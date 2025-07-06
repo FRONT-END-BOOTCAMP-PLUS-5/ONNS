@@ -1,6 +1,14 @@
 'use client';
+import OotdFilter from "./components/OotdFilter";
 
-//ootd
-export default function Ootd() {
-  return <></>;
+
+const Ootd = () => {
+
+
+  return (
+   <OotdFilter/>
+  )
+
 }
+
+export default Ootd;  

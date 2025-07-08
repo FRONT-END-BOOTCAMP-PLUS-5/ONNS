@@ -69,11 +69,7 @@ const OotdFilter = () => {
                   e.stopPropagation();
                   handleSelect(season);
                 }}
-                className={`w-full text-left text-[12px] rounded-[8px] px-2 py-[2px] ${selected === season
-                    ? 'bg-[#6A71E5] text-white'
-                    : 'text-[#6A71E5] '
-                  }`}
-              >
+                className={`w-full text-left text-[12px] rounded-[8px] px-2 py-[2px] ${selected === season? 'bg-[#6A71E5] text-white': 'text-[#6A71E5] '}`}>
                 {season}
               </button>
             ))}

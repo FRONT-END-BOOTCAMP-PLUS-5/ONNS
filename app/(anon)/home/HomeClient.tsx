@@ -1,11 +1,12 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLoginModal } from '@/hooks/useLoginModal';
-import { KakaoLoginModalContainer } from '@/app/components';
+import { Header, KakaoLoginModalContainer } from '@/app/components';
 
 export default function HomeClient() {
+  const [isEditing, setIsEditing] = useState(false);
   const searchParams = useSearchParams();
   const { showLoginModal, handleOpenModal, isAuthenticated, loading, handleCloseModal } =
     useLoginModal();
@@ -25,6 +26,21 @@ export default function HomeClient() {
       {showLoginModal && (
         <KakaoLoginModalContainer onLogin={handleLogin} onClose={handleCloseModal} />
       )}
+      <Header
+        isGoBack={true} // 뒤로 가기
+        // 오른쪽 아이콘 (알림,닫기,수정 중 사용하고 싶은 게 있으면)
+        // rightIcons={[{ type: 'notification', active: true, onClick: () => {} }]} //알림
+        // rightIcons={[{ type: 'close', onClick: () => {} }]} //닫기
+        rightIcons={[
+          {
+            type: 'edit',
+            isEditing,
+            onClick: () => {
+              setIsEditing(!isEditing);
+            },
+          },
+        ]} //수정(위에 isEditing 상태 선언 필요)
+      />
     </>
   );
 }

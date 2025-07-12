@@ -41,7 +41,7 @@ const Header = ({ isGoBack = false, rightIcons = [] }: HeaderProps) => {
           return (
             <button
               key={`edit-${idx}`}
-              className="w-[24px] h-[24px] flex items-center justify-center text-[16px] whitespace-nowrap text-[color:var(--b400)]"
+              className="w-[24px] h-[24px] flex items-center justify-center text-[16px] whitespace-nowrap text-[color:var(--b400)] "
               onClick={icon.onClick}
               aria-label={icon.isEditing ? '수정' : '완료'}
             >

@@ -31,8 +31,6 @@ export class SbAuthRepository implements IAuthRepository {
   }
 
   generateJWT(user: User): Tokens {
-    const now = Math.floor(Date.now() / 1000);
-
     const accessToken = jwt.sign(
       {
         id: user.id,
@@ -45,7 +43,7 @@ export class SbAuthRepository implements IAuthRepository {
       {
         algorithm: 'HS256',
         expiresIn: '15m',
-        notBefore: now,
+        // notBefore: now, // 제거 - NotBeforeError 방지
       },
     );
 
@@ -59,7 +57,7 @@ export class SbAuthRepository implements IAuthRepository {
       {
         algorithm: 'HS256',
         expiresIn: '7d',
-        notBefore: now,
+        // notBefore: now, // 제거 - NotBeforeError 방지
       },
     );
 

@@ -1,6 +1,7 @@
-import { KakaoAuthService } from '../../domain/repositories/KakaoAuthService';
+import { IKakaoAuthService } from '../../domain/repositories/IKakaoAuthService';
+import { User } from '../../domain/entities/User';
 
-export class KakaoAuthServiceImpl implements KakaoAuthService {
+export class SbKakaoAuthServiceImpl implements IKakaoAuthService {
   async getAccessToken(code: string): Promise<string> {
     const tokenRes = await fetch('https://kauth.kakao.com/oauth/token', {
       method: 'POST',
@@ -14,7 +15,6 @@ export class KakaoAuthServiceImpl implements KakaoAuthService {
     });
 
     const tokenData = await tokenRes.json();
-    console.log('카카오 토큰 응답:', tokenData);
 
     if (!tokenData.access_token) {
       throw new Error('Failed to get Kakao access token');
@@ -23,11 +23,7 @@ export class KakaoAuthServiceImpl implements KakaoAuthService {
     return tokenData.access_token;
   }
 
-  async getUserInfo(accessToken: string): Promise<{
-    id: string;
-    name: string;
-    profile_img: string;
-  }> {
+  async getUserInfo(accessToken: string): Promise<User> {
     const userRes = await fetch('https://kapi.kakao.com/v2/user/me', {
       method: 'GET',
       headers: {
@@ -44,7 +40,7 @@ export class KakaoAuthServiceImpl implements KakaoAuthService {
     return {
       id: userData.id,
       name: userData.properties?.nickname,
-      profile_img: userData.properties?.profile_image,
+      profileImg: userData.properties?.profile_image,
     };
   }
 }

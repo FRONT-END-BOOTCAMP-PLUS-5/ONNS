@@ -1,11 +1,11 @@
-import { AuthRepository } from '../../domain/repositories/AuthRepository';
-import { KakaoAuthService } from '../../domain/repositories/KakaoAuthService';
+import { IAuthRepository } from '../../domain/repositories/IAuthRepository';
+import { IKakaoAuthService } from '../../domain/repositories/IKakaoAuthService';
 import { User } from '../../domain/entities/User';
 
 export class KakaoLoginUseCase {
   constructor(
-    private kakaoAuthService: KakaoAuthService,
-    private authRepository: AuthRepository,
+    private kakaoAuthService: IKakaoAuthService,
+    private authRepository: IAuthRepository,
   ) {}
 
   async execute(code: string): Promise<{ user: User; token: string }> {

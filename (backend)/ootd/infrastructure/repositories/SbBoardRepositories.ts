@@ -28,15 +28,11 @@ class SbBoardRepository implements IBoardRepository {
 
   // 게시글 생성
   async create(board: Omit<Board, 'id' | 'date_created'>, img_url?: string[]): Promise<Board> {
-    const { data, error } = await this.supabase.from('post').insert([board]).select().single();
-    if (error) {
-      console.error('Supabase error:', error);
-      throw new Error(`Failed to create board: ${error.message}`);
-    }
+    const { data } = await this.supabase.from('post').insert([board]).select().single();
     if (!data) {
-      throw new Error('No data returned from insert operation');
+      throw new Error('데이터 반환 없음');
     }
-    console.log('Successfully created board:', data);
+    console.log('성공적으로 게시글 생성:', data);
 
     // 이미지 저장 (있는 경우)
     if (img_url && Array.isArray(img_url) && img_url.length > 0) {
@@ -67,9 +63,6 @@ class SbBoardRepository implements IBoardRepository {
 
   //게시글 수정(글 내용만 수정)
   async update(id: string, updateData: Partial<Board>): Promise<void> {
-    if (!updateData.text) {
-      throw new Error('text 필드만 수정할 수 있습니다.');
-    }
     const { error } = await this.supabase
       .from('post')
       .update({ text: updateData.text })
@@ -88,9 +81,30 @@ class SbBoardRepository implements IBoardRepository {
     }
   }
 
+  /*게시글 삭제 */
   async delete(id: string): Promise<void> {
-    const { error } = await this.supabase.from('post').delete().eq('id', id);
-    if (error) throw error;
+    try {
+      // 1. 게시글 이미지 삭제
+      const { error: photoError } = await this.supabase.from('photo').delete().eq('post_id', id);
+
+      if (photoError) {
+        console.error('이미지 삭제 실패:', photoError);
+        throw new Error(`이미지 삭제 실패: ${photoError.message}`);
+      }
+
+      // 2. 게시글 삭제
+      const { error: postError } = await this.supabase.from('post').delete().eq('id', id);
+
+      if (postError) {
+        console.error('게시글 삭제 실패:', postError);
+        throw new Error(`게시글 삭제 실패: ${postError.message}`);
+      }
+
+      console.log('삭제 성공:', id);
+    } catch (error) {
+      console.error('삭제 실패:', error);
+      throw error;
+    }
   }
 
   // 계절별 게시글 조회 (최신순 정렬)

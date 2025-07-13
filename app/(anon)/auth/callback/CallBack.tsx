@@ -2,13 +2,19 @@
 
 import { useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { kakaoLogin } from '@/app/api/auth';
 import { KakaoTalkLoginBtn, Modal } from '@/app/components';
+import axios from 'axios';
 
 export default function Callback() {
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
   const router = useRouter();
+
+  const kakaoLogin = async (code: string) => {
+    const response = await axios.post('/api/auth/kakao', { code });
+    return response.data;
+  };
+
   useEffect(() => {
     const login = async () => {
       if (!code) {

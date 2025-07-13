@@ -14,7 +14,6 @@ class GetPostUseCase {
     try {
       const boards = await this.boardRepository.getAll();
 
-      // 각 게시글에 isMyPost 정보 추가
       return boards.map((board) => BoardMapper.toDomain(board, myUserId));
     } catch (error) {
       console.error('Error fetching boards:', error);

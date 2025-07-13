@@ -1,52 +1,26 @@
-import CreateUseCase from '@/(backend)/ootd/application/usecases/CreateUseCase';
-import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostUseCase';
 import SbBoardRepository from '@/(backend)/ootd/infrastructure/repositories/SbBoardRepositories';
 import { supabase } from '@/utils/supabase/supabaseClient';
 import { NextRequest, NextResponse } from 'next/server';
-import UpdateUseCase from '@/(backend)/ootd/application/usecases/UpdateUseCase';
-import DeleteUseCase from '@/(backend)/ootd/application/usecases/DeleteUseCase';
+import { getUserFromJWT } from '@/utils/auth/tokenAuth';
 
-/* 게시글 작성 */
-export async function POST(req: NextRequest) {
+/* 특정 게시글 조회 */
+export async function GET(req: NextRequest) {
   try {
+    const segments = req.nextUrl.pathname.split('/');
+    const id = segments[segments.length - 1];
+
     const supabaseClient = supabase;
     const repository = new SbBoardRepository(supabaseClient);
-    const createUseCase = new CreateUseCase(repository);
 
-    const body = await req.json();
-    const { text, feels_like, user_id, img_url } = body;
+    const post = await repository.getById(id);
 
-    // img_url이 문자열이면 배열로 변환
-    const imgUrls = img_url ? (Array.isArray(img_url) ? img_url : [img_url]) : [];
+    if (!post) {
+      return NextResponse.json({ message: '게시글을 찾을 수 없습니다.' }, { status: 404 });
+    }
 
-    const created = await createUseCase.execute(
-      {
-        text,
-        feels_like,
-        user_id,
-      },
-      imgUrls,
-    );
-
-    return NextResponse.json(created, { status: 201 });
+    return NextResponse.json(post, { status: 200 });
   } catch (error) {
-    console.error('Error creating board:', error);
-    return NextResponse.json({ message: '서버 에러', error: 'UNKNOWN_ERROR' }, { status: 500 });
-  }
-}
-
-/* 게시글 조회 */
-export async function GET() {
-  try {
-    const supabaseClient = supabase;
-    const repository = new SbBoardRepository(supabaseClient);
-    const getPostUseCase = new GetPostUseCase(repository);
-
-    const posts = await getPostUseCase.getAllPosts();
-
-    return NextResponse.json(posts, { status: 200 });
-  } catch (error) {
-    console.error('Error fetching posts:', error);
+    console.error('Error fetching post:', error);
     return NextResponse.json(
       { message: '게시글 조회 실패', error: 'FETCH_ERROR' },
       { status: 500 },
@@ -57,48 +31,56 @@ export async function GET() {
 /* 게시글 수정 */
 export async function PUT(req: NextRequest) {
   try {
-    const supabaseClient = supabase;
-    const repository = new SbBoardRepository(supabaseClient);
-    const updateUseCase = new UpdateUseCase(repository);
-
-    const body = await req.json();
-    const { id, text } = body;
-
-    if (!id || typeof text !== 'string') {
-      return NextResponse.json({ message: 'id와 text는 필수입니다.' }, { status: 400 });
+    const user = await getUserFromJWT();
+    if (!user) {
+      return NextResponse.json({ message: '로그인이 필요합니다.' }, { status: 401 });
     }
 
-    await updateUseCase.execute(id, { text });
-
-    return NextResponse.json({ message: '게시글이 수정되었습니다.' }, { status: 200 });
-  } catch (error) {
-    console.error('Error updating board:', error);
-    return NextResponse.json(
-      { message: '게시글 수정 실패', error: 'UPDATE_ERROR' },
-      { status: 500 },
-    );
-  }
-}
-
-export async function DELETE(req: NextRequest) {
-  try {
     const segments = req.nextUrl.pathname.split('/');
     const id = segments[segments.length - 1];
 
-    if (!id) {
-      return NextResponse.json({ message: '게시글 ID는 필수입니다.' }, { status: 400 });
+    const body = await req.json();
+    const { text } = body;
+
+    if (!text || typeof text !== 'string') {
+      return NextResponse.json({ message: 'text는 필수입니다.' }, { status: 400 });
     }
 
-    const repository = new SbBoardRepository(supabase);
-    const deleteUseCase = new DeleteUseCase(repository);
-    await deleteUseCase.execute(id);
+    const supabaseClient = supabase;
+    const repository = new SbBoardRepository(supabaseClient);
+
+    await repository.update(id, { text }, user.id);
+
+    return NextResponse.json({ message: '게시글이 수정되었습니다.' }, { status: 200 });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('권한이 없습니다')) {
+      return NextResponse.json({ message: '수정 권한이 없습니다.' }, { status: 403 });
+    }
+    return NextResponse.json({ message: '게시글 수정 실패' }, { status: 500 });
+  }
+}
+
+/* 게시글 삭제 */
+export async function DELETE(req: NextRequest) {
+  try {
+    const user = await getUserFromJWT();
+    if (!user) {
+      return NextResponse.json({ message: '로그인이 필요합니다.' }, { status: 401 });
+    }
+
+    const segments = req.nextUrl.pathname.split('/');
+    const id = segments[segments.length - 1];
+
+    const supabaseClient = supabase;
+    const repository = new SbBoardRepository(supabaseClient);
+
+    await repository.delete(id, user.id);
 
     return NextResponse.json({ message: '게시글이 삭제되었습니다.' }, { status: 200 });
   } catch (error) {
-    console.error('게시글 삭제 실패', error);
-    return NextResponse.json(
-      { message: '게시글 삭제 실패', error: 'DELETE_ERROR' },
-      { status: 500 },
-    );
+    if (error instanceof Error && error.message.includes('권한이 없습니다')) {
+      return NextResponse.json({ message: '삭제 권한이 없습니다.' }, { status: 403 });
+    }
+    return NextResponse.json({ message: '게시글 삭제 실패' }, { status: 500 });
   }
 }

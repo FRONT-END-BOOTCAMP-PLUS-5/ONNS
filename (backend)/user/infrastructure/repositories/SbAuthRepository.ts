@@ -43,7 +43,6 @@ export class SbAuthRepository implements IAuthRepository {
       {
         algorithm: 'HS256',
         expiresIn: '15m',
-        // notBefore: now, // 제거 - NotBeforeError 방지
       },
     );
 
@@ -57,7 +56,6 @@ export class SbAuthRepository implements IAuthRepository {
       {
         algorithm: 'HS256',
         expiresIn: '7d',
-        // notBefore: now, // 제거 - NotBeforeError 방지
       },
     );
 

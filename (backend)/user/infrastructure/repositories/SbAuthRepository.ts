@@ -3,12 +3,14 @@ import { User } from '../../domain/entities/User';
 import { JWTPayload } from '../../domain/entities/JWTPayload';
 import { supabase } from '@/utils/supabase/supabaseClient';
 import jwt from 'jsonwebtoken';
+import { Tokens } from '@/types/auth';
 
 // 메모리 기반 블랙리스트 (서버 재시작 시 초기화됨)
 const tokenBlacklist = new Set<string>();
 
 export class SbAuthRepository implements IAuthRepository {
   private readonly JWT_SECRET = process.env.JWT_SECRET!;
+  private readonly REFRESH_SECRET = process.env.REFRESH_SECRET!;
 
   async upsertUser(user: User): Promise<User> {
     const { data, error } = await supabase
@@ -28,16 +30,40 @@ export class SbAuthRepository implements IAuthRepository {
     return data;
   }
 
-  generateJWT(user: User): string {
-    return jwt.sign(
+  generateJWT(user: User): Tokens {
+    const now = Math.floor(Date.now() / 1000);
+
+    const accessToken = jwt.sign(
       {
         id: user.id,
         name: user.name,
         profile_img: user.profileImg,
+        type: 'access',
+        jti: crypto.randomUUID(),
       },
       this.JWT_SECRET,
-      { expiresIn: '7d' },
+      {
+        algorithm: 'HS256',
+        expiresIn: '15m',
+        notBefore: now,
+      },
     );
+
+    const refreshToken = jwt.sign(
+      {
+        id: user.id,
+        type: 'refresh',
+        jti: crypto.randomUUID(),
+      },
+      this.REFRESH_SECRET,
+      {
+        algorithm: 'HS256',
+        expiresIn: '7d',
+        notBefore: now,
+      },
+    );
+
+    return { accessToken, refreshToken };
   }
 
   async findUserByToken(token: string): Promise<User | null> {

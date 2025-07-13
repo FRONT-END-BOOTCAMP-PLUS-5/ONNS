@@ -15,17 +15,28 @@ export async function POST(req: Request) {
     const authRepository = new SbAuthRepository();
     const kakaoAuthService = new SbKakaoAuthServiceImpl();
     const kakaoLoginUseCase = new KakaoLoginUseCase(kakaoAuthService, authRepository);
-    const { token } = await kakaoLoginUseCase.execute(code);
+    const { tokens } = await kakaoLoginUseCase.execute(code);
 
     const cookieStore = await cookies();
-    cookieStore.set('token', token, {
+    cookieStore.set('token', tokens.accessToken, {
       httpOnly: true,
       path: '/',
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 7, // 7일
+      maxAge: 60 * 15,
     });
 
-    return NextResponse.json({ success: true });
+    cookieStore.set('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return NextResponse.json({
+      success: true,
+      access_token: tokens.accessToken,
+      refresh_token: tokens.refreshToken,
+    });
   } catch (err) {
     console.error('카카오 로그인 오류:', err);
 

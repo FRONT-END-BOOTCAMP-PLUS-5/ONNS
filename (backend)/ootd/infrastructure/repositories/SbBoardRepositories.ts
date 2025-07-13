@@ -62,49 +62,47 @@ class SbBoardRepository implements IBoardRepository {
   }
 
   //게시글 수정(글 내용만 수정)
-  async update(id: string, updateData: Partial<Board>): Promise<void> {
+  async update(id: string, updateData: Partial<Board>, userId: number): Promise<void> {
+    // 권한 확인
+    const { data: post } = await this.supabase
+      .from('post')
+      .select('user_id')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
+
+    if (!post) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 수정 실행
     const { error } = await this.supabase
       .from('post')
       .update({ text: updateData.text })
       .eq('id', id);
     if (error) throw error;
-
-    const { data: updated, error: selectError } = await this.supabase
-      .from('post')
-      .select('*')
-      .eq('id', id)
-      .single();
-    if (selectError) {
-      console.error('수정된 게시글 조회 실패:', selectError);
-    } else {
-      console.log('수정된 게시글:', updated);
-    }
   }
 
   /*게시글 삭제 */
-  async delete(id: string): Promise<void> {
-    try {
-      // 1. 게시글 이미지 삭제
-      const { error: photoError } = await this.supabase.from('photo').delete().eq('post_id', id);
+  async delete(id: string, userId: number): Promise<void> {
+    // 권한 확인
+    const { data: post } = await this.supabase
+      .from('post')
+      .select('user_id')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
 
-      if (photoError) {
-        console.error('이미지 삭제 실패:', photoError);
-        throw new Error(`이미지 삭제 실패: ${photoError.message}`);
-      }
-
-      // 2. 게시글 삭제
-      const { error: postError } = await this.supabase.from('post').delete().eq('id', id);
-
-      if (postError) {
-        console.error('게시글 삭제 실패:', postError);
-        throw new Error(`게시글 삭제 실패: ${postError.message}`);
-      }
-
-      console.log('삭제 성공:', id);
-    } catch (error) {
-      console.error('삭제 실패:', error);
-      throw error;
+    if (!post) {
+      throw new Error('권한이 없습니다.');
     }
+
+    // 이미지 삭제
+    await this.supabase.from('photo').delete().eq('post_id', id);
+
+    // 게시글 삭제
+    const { error } = await this.supabase.from('post').delete().eq('id', id);
+    if (error) throw error;
   }
 
   // 계절별 게시글 조회 (최신순 정렬)

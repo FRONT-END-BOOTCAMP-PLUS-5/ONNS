@@ -1,5 +1,4 @@
 import CreateUseCase from '@/(backend)/ootd/application/usecases/CreateUseCase';
-import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostUseCase';
 import SbBoardRepository from '@/(backend)/ootd/infrastructure/repositories/SbBoardRepositories';
 import { supabase } from '@/utils/supabase/supabaseClient';
 import { NextRequest, NextResponse } from 'next/server';
@@ -34,23 +33,24 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/* 게시글 조회 */
-export async function GET() {
+/* 특정 게시글 조회 */
+export async function GET(req: NextRequest) {
   try {
+    const segments = req.nextUrl.pathname.split('/');
+    const id = segments[segments.length - 1];
+
     const supabaseClient = supabase;
     const repository = new SbBoardRepository(supabaseClient);
-    const getPostUseCase = new GetPostUseCase(repository);
 
-    // 현재 사용자 정보 가져오기
-    const user = await getUserFromJWT();
-    const myUserId = user?.id || 0;
+    const post = await repository.getById(id);
 
-    console.log('전체 게시글 조회');
-    const posts = await getPostUseCase.getAllPosts(myUserId);
+    if (!post) {
+      return NextResponse.json({ message: '게시글을 찾을 수 없습니다.' }, { status: 404 });
+    }
 
-    return NextResponse.json(posts, { status: 200 });
+    return NextResponse.json(post, { status: 200 });
   } catch (error) {
-    console.error('게시글 조회 실패', error);
+    console.error('Error fetching post:', error);
     return NextResponse.json(
       { message: '게시글 조회 실패', error: 'FETCH_ERROR' },
       { status: 500 },

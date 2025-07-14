@@ -4,12 +4,14 @@ const nextConfig: NextConfig = {
   // Image domains configuration
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
-      },
+      { protocol: 'https', hostname: 'picsum.photos', port: '', pathname: '/**' },
+      { protocol: 'https', hostname: 'k.kakaocdn.net', port: '', pathname: '/**' },
+      { protocol: 'http', hostname: 'k.kakaocdn.net', port: '', pathname: '/**' },
+      // 신규 추가
+      { protocol: 'http', hostname: 'img1.kakaocdn.net', port: '', pathname: '/**' },
+      { protocol: 'https', hostname: 'img1.kakaocdn.net', port: '', pathname: '/**' },
+      { protocol: 'http', hostname: 't1.kakaocdn.net', port: '', pathname: '/**' },
+      { protocol: 'https', hostname: 't1.kakaocdn.net', port: '', pathname: '/**' },
     ],
   },
   // TurboPack 설정

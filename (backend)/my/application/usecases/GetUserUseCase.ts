@@ -4,7 +4,8 @@ import { User } from '../../domain/entities/User';
 export class GetUserUseCase {
   constructor(private userRepository: IUserRepository) {}
 
-  async execute(userId: number): Promise<User | null> {
+  async execute(userId: number | undefined): Promise<User | null> {
+    if (!userId) return null;
     try {
       const user = await this.userRepository.getUserById(userId);
       return user;

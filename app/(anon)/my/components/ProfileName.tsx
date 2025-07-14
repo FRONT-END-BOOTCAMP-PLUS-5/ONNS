@@ -1,13 +1,15 @@
 interface ProfileNameProps {
-    nickname: string;
+  userName: string | null;
 }
 
-const ProfileName = ({ nickname }: ProfileNameProps) => {
-    return (
-        <div className="inline-flex justify-start items-center gap-1 relative">
-            <div className="text-center justify-start text-black text-base font-medium font-['Pretendard']">{nickname}</div>
-        </div>
-    );
+const ProfileName = ({ userName }: ProfileNameProps) => {
+  return (
+    <div className="inline-flex justify-start items-center gap-1 relative">
+      <div className="text-center justify-start text-black text-base font-medium font-['Pretendard']">
+        {userName}
+      </div>
+    </div>
+  );
 };
 
 export default ProfileName;

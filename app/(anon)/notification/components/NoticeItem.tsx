@@ -1,10 +1,11 @@
 'use client';
+import { truncateText } from '@/lib/truncateText';
 import Comment from '@/public/assets/icons/chat.svg';
 import Likes from '@/public/assets/icons/heart.svg';
 import { useRouter } from 'next/navigation';
 
 interface NoticeItemProps {
-  type: 'comment' | 'reply' | 'like';
+  type: string;
   user: string;
   timestamp: string;
   isRead: boolean;
@@ -14,13 +15,14 @@ interface NoticeItemProps {
 const NoticeItem: React.FC<NoticeItemProps> = ({ type, user, timestamp, isRead, postId }) => {
   const router = useRouter();
   const getText = () => {
+    const truncatedUser = truncateText(user, 4);
     switch (type) {
       case 'comment':
-        return `${user}님이 당신의 게시글에 댓글을 남겼어요.`;
+        return `${truncatedUser}님이 당신의 게시글에 댓글을 남겼어요.`;
       case 'reply':
-        return `${user}님이 당신의 댓글의 대댓글을 남겼어요.`;
+        return `${truncatedUser}님이 당신의 댓글의 대댓글을 남겼어요.`;
       case 'like':
-        return `${user}님이 당신의 게시글에 좋아요를 남겼어요.`;
+        return `${truncatedUser}님이 당신의 게시글에 좋아요를 남겼어요.`;
       default:
         return '';
     }
@@ -56,9 +58,7 @@ const NoticeItem: React.FC<NoticeItemProps> = ({ type, user, timestamp, isRead, 
           </div>
           <div className="flex-1 inline-flex flex-col justify-center items-start gap-1">
             <div className="px-1 inline-flex justify-center items-center gap-2.5">
-              <div className="text-center justify-start text-black text-base font-normal">
-                {getText()}
-              </div>
+              <div className="text-center justify-start text-[16px] text-black">{getText()}</div>
             </div>
             <div className="self-stretch px-1 inline-flex justify-start items-center gap-2.5">
               <div className="text-center justify-start text-[#949494] text-xs font-normal">

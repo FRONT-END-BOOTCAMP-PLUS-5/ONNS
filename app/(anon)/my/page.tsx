@@ -2,10 +2,10 @@
 
 import ProfileHeader from './components/ProfileHeader';
 import ToggleBar from './components/ToggleBar';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import ProfileEditHeader from './components/ProfileEditHeader';
 import { useEditStore } from '@/stores/editState';
+import api from '@/utils/axiosInstance';
 
 //my
 export default function My() {
@@ -16,7 +16,7 @@ export default function My() {
   useEffect(() => {
     const fetchProfileInfo = async () => {
       try {
-        const res = await axios.get('/api/my/me');
+        const res = await api.get('/my/me');
 
         if (res.data.ok && res.data.user) {
           setUserName(res.data.user.name);

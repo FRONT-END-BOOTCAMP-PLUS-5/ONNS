@@ -32,14 +32,33 @@ export async function PATCH(request: Request) {
   }
 
   const body = await request.json();
-  const updateFields = {
-    name: body.name,
-    profile_img: body.profile_img,
-  };
 
+  // First, get current user data
   const repository = new SbUserRepository(supabase);
-  const updateUserUseCase = new UpdateUserUseCase(repository);
+  const getUserUseCase = new GetUserUseCase(repository);
+  const currentUser = await getUserUseCase.execute(user.id);
 
+  if (!currentUser) {
+    return NextResponse.json({ ok: false, error: 'User not found' }, { status: 404 });
+  }
+
+  // Only update fields that are provided and different from current values
+  const updateFields: { name?: string; profile_img?: string } = {};
+
+  if (body.name !== undefined && body.name !== currentUser.name) {
+    updateFields.name = body.name;
+  }
+
+  if (body.profile_img !== undefined && body.profile_img !== currentUser.profile_img) {
+    updateFields.profile_img = body.profile_img;
+  }
+
+  // If no fields need updating, return current user data
+  if (Object.keys(updateFields).length === 0) {
+    return NextResponse.json({ ok: true, user: currentUser, message: 'No changes detected' });
+  }
+
+  const updateUserUseCase = new UpdateUserUseCase(repository);
   const updatedUser = await updateUserUseCase.execute(user.id, updateFields);
 
   if (!updatedUser) {

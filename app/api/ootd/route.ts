@@ -1,10 +1,9 @@
-import CreateUseCase from '@/(backend)/ootd/application/usecases/CreateUseCase';
 import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostUseCase';
+import CreateUseCase from '@/(backend)/ootd/application/usecases/CreateUseCase';
 import SbBoardRepository from '@/(backend)/ootd/infrastructure/repositories/SbBoardRepositories';
 import { supabase } from '@/utils/supabase/supabaseClient';
 import { NextRequest, NextResponse } from 'next/server';
-import UpdateUseCase from '@/(backend)/ootd/application/usecases/UpdateUseCase';
-import DeleteUseCase from '@/(backend)/ootd/application/usecases/DeleteUseCase';
+import { getUserFromJWT } from '@/utils/auth/tokenAuth';
 
 /* 게시글 작성 */
 export async function POST(req: NextRequest) {
@@ -14,7 +13,7 @@ export async function POST(req: NextRequest) {
     const createUseCase = new CreateUseCase(repository);
 
     const body = await req.json();
-    const { text, feels_like, user_id, season, img_url } = body;
+    const { text, feels_like, user_id, img_url } = body;
 
     // img_url이 문자열이면 배열로 변환
     const imgUrls = img_url ? (Array.isArray(img_url) ? img_url : [img_url]) : [];
@@ -24,7 +23,6 @@ export async function POST(req: NextRequest) {
         text,
         feels_like,
         user_id,
-        season,
       },
       imgUrls,
     );
@@ -36,72 +34,24 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/* 게시글 조회 */
+/* 현재 계절 게시글 조회 */
 export async function GET() {
   try {
     const supabaseClient = supabase;
     const repository = new SbBoardRepository(supabaseClient);
     const getPostUseCase = new GetPostUseCase(repository);
 
-    const posts = await getPostUseCase.getAllPosts();
+    // 현재 사용자 정보 가져오기
+    const user = await getUserFromJWT();
+    const myUserId = user?.id || 0;
+
+    const posts = await getPostUseCase.getAllPosts(myUserId);
 
     return NextResponse.json(posts, { status: 200 });
   } catch (error) {
     console.error('Error fetching posts:', error);
     return NextResponse.json(
       { message: '게시글 조회 실패', error: 'FETCH_ERROR' },
-      { status: 500 },
-    );
-  }
-}
-
-/* 게시글 수정 */
-export async function PUT(req: NextRequest) {
-  try {
-    const supabaseClient = supabase;
-    const repository = new SbBoardRepository(supabaseClient);
-    const updateUseCase = new UpdateUseCase(repository);
-
-    const body = await req.json();
-    const { id, text } = body;
-
-    if (!id || typeof text !== 'string') {
-      return NextResponse.json({ message: 'id와 text는 필수입니다.' }, { status: 400 });
-    }
-
-    await updateUseCase.execute(id, { text });
-
-    return NextResponse.json({ message: '게시글이 수정되었습니다.' }, { status: 200 });
-  } catch (error) {
-    console.error('Error updating board:', error);
-    return NextResponse.json(
-      { message: '게시글 수정 실패', error: 'UPDATE_ERROR' },
-      { status: 500 },
-    );
-  }
-}
-
-/* 게시글 삭제 */
-export async function DELETE(req: NextRequest) {
-  try {
-    const supabaseClient = supabase;
-    const repository = new SbBoardRepository(supabaseClient);
-    const deleteUseCase = new DeleteUseCase(repository);
-
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
-
-    if (!id) {
-      return NextResponse.json({ message: '게시글 ID는 필수입니다.' }, { status: 400 });
-    }
-
-    await deleteUseCase.execute(id);
-
-    return NextResponse.json({ message: '게시글이 삭제되었습니다.' }, { status: 200 });
-  } catch (error) {
-    console.error('Error deleting board:', error);
-    return NextResponse.json(
-      { message: '게시글 삭제 실패', error: 'DELETE_ERROR' },
       { status: 500 },
     );
   }

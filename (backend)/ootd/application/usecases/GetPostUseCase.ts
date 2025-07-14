@@ -1,5 +1,6 @@
 import SbBoardRepository from '../../infrastructure/repositories/SbBoardRepositories';
-import Board from '../../domain/entities/Board';
+import { BoardWithUser } from '../dtos/BoardDto';
+import BoardMapper from '../../infrastructure/mapper/BoardMapper';
 
 class GetPostUseCase {
   private boardRepository: SbBoardRepository;
@@ -8,11 +9,11 @@ class GetPostUseCase {
     this.boardRepository = boardRepository;
   }
 
-  // 전체 글 조회
-  async getAllPosts(): Promise<Board[]> {
+  // 전체 글 조회 (현재 계절에 맞는 게시글만)
+  async getAllPosts(myUserId: number): Promise<BoardWithUser[]> {
     try {
-      const boards = await this.boardRepository.getAll();
-      return boards;
+      const boards = await this.boardRepository.getCurrentSeasonPosts();
+      return boards.map((board) => BoardMapper.toDomain(board, myUserId));
     } catch (error) {
       console.error('Error fetching boards:', error);
       throw error;

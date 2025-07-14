@@ -1,24 +1,19 @@
-import ProfileEdit from '@/public/assets/icons/profile_edit.svg';
-import Image, { StaticImageData } from 'next/image';
+import Image from 'next/image';
 
 interface ProfilePicProps {
-  onClick: () => void;
-  profilePicture: StaticImageData;
+  profilePicture: string | null;
 }
 
-const ProfilePic = ({ profilePicture, onClick }: ProfilePicProps) => {
+const ProfilePic = ({ profilePicture }: ProfilePicProps) => {
   return (
-    <div className="relative">
+    <div className="relative w-[121px] h-[121px]">
       <Image
-        width={121}
-        height={121}
-        className="rounded-full"
-        src={profilePicture.src}
+        fill
+        className="rounded-full object-cover"
+        src={profilePicture || ''}
         alt="profile picture"
-      />
-      <ProfileEdit
-        className="w-[26px] h-[26px] bg-transparent rounded-full shadow-[4px_4px_4px_0px_rgba(0,0,0,0.13)] cursor-pointer hover:bg-gray-50 transition-colors"
-        onClick={onClick}
+        sizes="121px"
+        priority
       />
     </div>
   );

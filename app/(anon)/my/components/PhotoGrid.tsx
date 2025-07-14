@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
@@ -24,28 +24,28 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ type }) => {
   // Mock data - replace with actual API call
   const fetchPhotos = useCallback(async (pageNum: number) => {
     setLoading(true);
-    
+
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // Mock data - replace with actual API call
     const mockPhotos: Photo[] = Array.from({ length: 10 }, (_, i) => ({
       id: `${pageNum}-${i}`,
       url: `https://picsum.photos/200/200?random=${pageNum}-${i}`,
-      alt: `Photo ${pageNum}-${i}`
+      alt: `Photo ${pageNum}-${i}`,
     }));
 
     if (pageNum === 1) {
       setPhotos(mockPhotos);
     } else {
-      setPhotos(prev => [...prev, ...mockPhotos]);
+      setPhotos((prev) => [...prev, ...mockPhotos]);
     }
-    
+
     // Stop loading more after 5 pages (50 photos)
     if (pageNum >= 5) {
       setHasMore(false);
     }
-    
+
     setLoading(false);
   }, []);
 
@@ -80,7 +80,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ type }) => {
   }, [handleScroll]);
 
   return (
-    <div className="px-4 py-6">
+    <div className="px-4 py-6 bg-white">
       {/* Photo Grid */}
       <div className="grid grid-cols-2 gap-2">
         {photos.map((photo) => (
@@ -105,12 +105,10 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ type }) => {
 
       {/* End of content */}
       {!hasMore && photos.length > 0 && (
-        <div className="text-center py-4 text-gray-500">
-          No more photos to load
-        </div>
+        <div className="text-center py-4 text-gray-500">No more photos to load</div>
       )}
     </div>
   );
 };
 
-export default PhotoGrid; 
+export default PhotoGrid;

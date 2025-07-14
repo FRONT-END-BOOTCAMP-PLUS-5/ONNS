@@ -1,22 +1,23 @@
 import SbBoardRepository from '../../infrastructure/repositories/SbBoardRepositories';
 import Board from '../../domain/entities/Board';
 
-class UpdateUseCase {
+class SeasonUseCase {
   private boardRepository: SbBoardRepository;
 
   constructor(boardRepository: SbBoardRepository) {
     this.boardRepository = boardRepository;
   }
 
-  async execute(id: string, updateData: Partial<Board>, userId: number): Promise<void> {
+  // 계절별 게시글 조회
+  async getPostsBySeason(season: string): Promise<Board[]> {
     try {
-      // text 필드만 수정
-      await this.boardRepository.update(id, { text: updateData.text }, userId);
+      const boards = await this.boardRepository.getBySeason(season);
+      return boards;
     } catch (error) {
-      console.error('Error updating board:', error);
+      console.error('Error fetching boards by season:', error);
       throw error;
     }
   }
 }
 
-export default UpdateUseCase;
+export default SeasonUseCase;

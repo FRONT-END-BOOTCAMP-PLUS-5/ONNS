@@ -38,12 +38,31 @@ class SbBoardRepository implements IBoardRepository {
   }
 
   // 게시글 생성
-  async create(board: Omit<Board, 'id' | 'date_created'>, img_url?: string[]): Promise<Board> {
-    const { data } = await this.supabase.from('post').insert([board]).select().single();
+  async create(
+    board: Omit<
+      Board,
+      | 'id'
+      | 'date_created'
+      | 'comment_count'
+      | 'like_count'
+      | 'photos'
+      | 'user'
+      | 'comments'
+      | 'likes'
+    >,
+    img_url?: string[],
+  ): Promise<Board> {
+    const insertData = {
+      text: board.text,
+      feels_like: board.feels_like,
+      user_id: board.user_id,
+    };
+
+    const { data, error } = await this.supabase.from('post').insert([insertData]).select().single();
+    if (error) throw error;
     if (!data) {
       throw new Error('데이터 반환 없음');
     }
-    console.log('성공적으로 게시글 생성:', data);
 
     // 이미지 저장 (있는 경우)
     if (img_url && Array.isArray(img_url) && img_url.length > 0) {
@@ -53,10 +72,8 @@ class SbBoardRepository implements IBoardRepository {
       }));
       const { error: photoError } = await this.supabase.from('photo').insert(photoData);
       if (photoError) {
-        console.error('Error saving photos:', photoError);
         throw new Error(`Failed to save photos: ${photoError.message}`);
       }
-      console.log('Successfully saved photos for board:', data.id);
     }
 
     // 게시글과 이미지를 함께 조회

@@ -10,7 +10,6 @@ export const useLoginModal = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Reset modal state when URL changes (no login parameter)
   useEffect(() => {
     if (!searchParams.get('login')) {
       setShowLoginModal(false);
@@ -24,7 +23,6 @@ export const useLoginModal = () => {
   const handleCloseModal = () => {
     setShowLoginModal(false);
 
-    // Clear the login parameter from URL and navigate to home
     const params = new URLSearchParams(searchParams);
     params.delete('login');
     const newUrl = params.toString() ? `/?${params.toString()}` : '/';

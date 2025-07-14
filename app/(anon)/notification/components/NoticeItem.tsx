@@ -3,8 +3,10 @@ import { truncateText } from '@/lib/truncateText';
 import Comment from '@/public/assets/icons/chat.svg';
 import Likes from '@/public/assets/icons/heart.svg';
 import { useRouter } from 'next/navigation';
+import api from '@/utils/axiosInstance';
 
 interface NoticeItemProps {
+  id: number;
   type: string;
   user: string;
   timestamp: string;
@@ -12,7 +14,7 @@ interface NoticeItemProps {
   postId: number;
 }
 
-const NoticeItem: React.FC<NoticeItemProps> = ({ type, user, timestamp, isRead, postId }) => {
+const NoticeItem: React.FC<NoticeItemProps> = ({ type, user, timestamp, isRead, postId, id }) => {
   const router = useRouter();
   const getText = () => {
     const truncatedUser = truncateText(user, 4);
@@ -40,8 +42,14 @@ const NoticeItem: React.FC<NoticeItemProps> = ({ type, user, timestamp, isRead, 
     }
   };
 
-  const handleClick = () => {
-    router.push(`/ootd/${postId}`);
+  const handleClick = async () => {
+    try {
+      await api.patch(`/notification/${id}/read`);
+      router.push(`/ootd/${postId}`);
+    } catch {
+      alert('알림 읽음 처리에 실패했습니다. 다시 시도해 주세요.');
+      router.replace('/notification');
+    }
   };
 
   const backgroundColor = isRead ? 'bg-white' : 'bg-[#9CAFFC]/10';

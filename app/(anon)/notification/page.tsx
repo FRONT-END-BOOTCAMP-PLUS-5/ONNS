@@ -56,7 +56,8 @@ export default function NotificationPage() {
     <div className="flex flex-col">
       {notifications.map((notification) => (
         <NoticeItem
-          key={notification.id}
+          key={`notif-${notification.id}`}
+          id={notification.id}
           isRead={notification.isRead}
           postId={notification.postId}
           type={notification.type}

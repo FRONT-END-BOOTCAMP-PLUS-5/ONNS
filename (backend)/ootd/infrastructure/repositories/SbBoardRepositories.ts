@@ -107,30 +107,47 @@ class SbBoardRepository implements IBoardRepository {
 
   // 계절별 게시글 조회 (최신순 정렬)
   async getBySeason(season: string): Promise<Board[]> {
+    const now = new Date();
+    const year = now.getFullYear();
+
+    let startMonth: number;
+    let endMonth: number;
+    let endYear = year;
+
+    switch (season) {
+      case '봄':
+        startMonth = 3;
+        endMonth = 5;
+        break;
+      case '여름':
+        startMonth = 6;
+        endMonth = 8;
+        break;
+      case '가을':
+        startMonth = 9;
+        endMonth = 11;
+        break;
+      case '겨울':
+        startMonth = 12;
+        endMonth = 2;
+        endYear = year + 1;
+        break;
+      default:
+        throw new Error('Invalid season');
+    }
+
+    const startDate = new Date(year, startMonth - 1, 1).toISOString();
+    const endDate = new Date(endYear, endMonth, 1).toISOString();
+
     const { data, error } = await this.supabase
       .from('post')
       .select(`*, photos:photo(img_url), user:user_id(id, name, profile_img)`)
+      .gte('date_created', startDate)
+      .lt('date_created', endDate)
       .order('date_created', { ascending: false });
+
     if (error) throw error;
-
-    // 생성 날짜 기준으로 계절 필터링
-    return data.filter((post) => {
-      const createdDate = new Date(post.date_created);
-      const createdMonth = createdDate.getMonth() + 1;
-
-      let postSeason: string;
-      if (createdMonth >= 3 && createdMonth <= 5) {
-        postSeason = '봄';
-      } else if (createdMonth >= 6 && createdMonth <= 8) {
-        postSeason = '여름';
-      } else if (createdMonth >= 9 && createdMonth <= 11) {
-        postSeason = '가을';
-      } else {
-        postSeason = '겨울';
-      }
-
-      return postSeason === season;
-    });
+    return data;
   }
 }
 

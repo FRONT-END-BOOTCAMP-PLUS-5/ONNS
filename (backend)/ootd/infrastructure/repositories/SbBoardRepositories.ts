@@ -138,8 +138,8 @@ class SbBoardRepository implements IBoardRepository {
     if (error) throw error;
   }
 
-  // 계절별 게시글 조회 (최신순 정렬, 댓글 수, 좋아요 수 포함)
-  async getBySeason(season: string): Promise<Board[]> {
+  // 계절별 게시글 조회 (정렬 옵션 포함)
+  async getBySeason(season: string, sort?: string): Promise<Board[]> {
     const now = new Date();
     const year = now.getFullYear();
 
@@ -190,17 +190,24 @@ class SbBoardRepository implements IBoardRepository {
     if (error) throw error;
 
     // 각 게시글에 댓글 수와 좋아요 수 추가
-    return data.map((post) => ({
+    const postsWithCounts = data.map((post) => ({
       ...post,
       comment_count: post.comments?.[0]?.count || 0,
       like_count: post.likes?.[0]?.count || 0,
       comments: undefined,
       likes: undefined,
     }));
+
+    // 정렬 옵션에 따라 JavaScript에서 정렬
+    if (sort === 'popular') {
+      return postsWithCounts.sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
+    }
+
+    return postsWithCounts;
   }
 
-  // 현재 계절에 맞는 게시글 조회 (댓글 수, 좋아요 수 포함)
-  async getCurrentSeasonPosts(): Promise<Board[]> {
+  // 현재 계절에 맞는 게시글 조회 (정렬 옵션 포함)
+  async getCurrentSeasonPosts(sort?: string): Promise<Board[]> {
     const now = new Date();
     const month = now.getMonth() + 1;
 
@@ -216,13 +223,17 @@ class SbBoardRepository implements IBoardRepository {
       season = '겨울';
     }
 
-    // 기존 getBySeason 로직 사용 (이미 최신순 정렬됨)
-    const posts = await this.getBySeason(season);
+    // 기존 getBySeason 로직 사용 (정렬 옵션 전달)
+    const posts = await this.getBySeason(season, sort);
 
-    // 추가로 최신순 정렬 보장
-    return posts.sort(
-      (a, b) => new Date(b.date_created).getTime() - new Date(a.date_created).getTime(),
-    );
+    // 추가로 최신순 정렬 보장 (인기순이 아닌 경우에만)
+    if (sort !== 'popular') {
+      return posts.sort(
+        (a, b) => new Date(b.date_created).getTime() - new Date(a.date_created).getTime(),
+      );
+    }
+
+    return posts;
   }
 }
 

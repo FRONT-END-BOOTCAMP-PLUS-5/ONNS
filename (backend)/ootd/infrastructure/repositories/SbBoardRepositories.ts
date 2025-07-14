@@ -5,25 +5,37 @@ import IBoardRepository from '../../domain/repositories/IBoradRepository';
 class SbBoardRepository implements IBoardRepository {
   constructor(private readonly supabase: SupabaseClient) {}
 
-  // 게시글 조회 (최신순 정렬)
-  async getAll(): Promise<Board[]> {
-    const { data, error } = await this.supabase
-      .from('post')
-      .select(`*, photos:photo(img_url), user:user_id(id, name, profile_img)`)
-      .order('date_created', { ascending: false });
-    if (error) throw error;
-    return data;
-  }
-
-  // 게시글 상세 조회
+  // 게시글 상세 조회 (댓글 수, 좋아요 수 포함)
   async getById(id: string): Promise<Board | null> {
     const { data, error } = await this.supabase
       .from('post')
-      .select(`*, photos:photo(img_url), user:user_id(id, name, profile_img)`)
+      .select(
+        `
+        *, 
+        photos:photo(img_url), 
+        user:user_id(id, name, profile_img),
+        comments:comment(count),
+        likes:likes(count)
+      `,
+      )
       .eq('id', id)
       .single();
+
     if (error) throw error;
-    return data;
+    if (!data) return null;
+
+    // 댓글 수와 좋아요 수 추가
+    const postWithCounts = {
+      ...data,
+      comment_count: data.comments?.[0]?.count || 0,
+      like_count: data.likes?.[0]?.count || 0,
+    };
+
+    // 불필요한 필드 제거
+    delete postWithCounts.comments;
+    delete postWithCounts.likes;
+
+    return postWithCounts;
   }
 
   // 게시글 생성
@@ -48,17 +60,38 @@ class SbBoardRepository implements IBoardRepository {
       console.log('Successfully saved photos for board:', data.id);
     }
 
-    // 게시글과 이미지를 함께 조회
+    // 게시글과 이미지를 함께 조회 (댓글 수, 좋아요 수 포함)
     const { data: fullData, error: fetchError } = await this.supabase
       .from('post')
-      .select(`*, photos:photo(img_url), user:user_id(id, name, profile_img)`)
+      .select(
+        `
+        *, 
+        photos:photo(img_url), 
+        user:user_id(id, name, profile_img),
+        comments:comment(count),
+        likes:likes(count)
+      `,
+      )
       .eq('id', data.id)
       .single();
+
     if (fetchError) {
       console.error('Error fetching created board with photos:', fetchError);
       return data;
     }
-    return fullData;
+
+    // 댓글 수와 좋아요 수 추가
+    const postWithCounts = {
+      ...fullData,
+      comment_count: fullData.comments?.[0]?.count || 0,
+      like_count: fullData.likes?.[0]?.count || 0,
+    };
+
+    // 불필요한 필드 제거
+    delete postWithCounts.comments;
+    delete postWithCounts.likes;
+
+    return postWithCounts;
   }
 
   //게시글 수정(글 내용만 수정)
@@ -105,7 +138,7 @@ class SbBoardRepository implements IBoardRepository {
     if (error) throw error;
   }
 
-  // 계절별 게시글 조회 (최신순 정렬)
+  // 계절별 게시글 조회 (최신순 정렬, 댓글 수, 좋아요 수 포함)
   async getBySeason(season: string): Promise<Board[]> {
     const now = new Date();
     const year = now.getFullYear();
@@ -141,13 +174,55 @@ class SbBoardRepository implements IBoardRepository {
 
     const { data, error } = await this.supabase
       .from('post')
-      .select(`*, photos:photo(img_url), user:user_id(id, name, profile_img)`)
+      .select(
+        `
+        *, 
+        photos:photo(img_url), 
+        user:user_id(id, name, profile_img),
+        comments:comment(count),
+        likes:likes(count)
+      `,
+      )
       .gte('date_created', startDate)
       .lt('date_created', endDate)
       .order('date_created', { ascending: false });
 
     if (error) throw error;
-    return data;
+
+    // 각 게시글에 댓글 수와 좋아요 수 추가
+    return data.map((post) => ({
+      ...post,
+      comment_count: post.comments?.[0]?.count || 0,
+      like_count: post.likes?.[0]?.count || 0,
+      comments: undefined,
+      likes: undefined,
+    }));
+  }
+
+  // 현재 계절에 맞는 게시글 조회 (댓글 수, 좋아요 수 포함)
+  async getCurrentSeasonPosts(): Promise<Board[]> {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+
+    // 현재 월에 맞는 계절 결정
+    let season: string;
+    if (month >= 3 && month <= 5) {
+      season = '봄';
+    } else if (month >= 6 && month <= 8) {
+      season = '여름';
+    } else if (month >= 9 && month <= 11) {
+      season = '가을';
+    } else {
+      season = '겨울';
+    }
+
+    // 기존 getBySeason 로직 사용 (이미 최신순 정렬됨)
+    const posts = await this.getBySeason(season);
+
+    // 추가로 최신순 정렬 보장
+    return posts.sort(
+      (a, b) => new Date(b.date_created).getTime() - new Date(a.date_created).getTime(),
+    );
   }
 }
 

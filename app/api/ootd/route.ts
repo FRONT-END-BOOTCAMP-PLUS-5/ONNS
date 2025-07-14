@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/* 전체 게시글 조회 */
+/* 현재 계절 게시글 조회 */
 export async function GET() {
   try {
     const supabaseClient = supabase;

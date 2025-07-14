@@ -2,6 +2,7 @@ import SbBoardRepository from '@/(backend)/ootd/infrastructure/repositories/SbBo
 import { supabase } from '@/utils/supabase/supabaseClient';
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromJWT } from '@/utils/auth/tokenAuth';
+import GetPostDetailUseCase from '@/(backend)/ootd/application/usecases/GetPostDetailUseCase';
 
 /* 특정 게시글 조회 */
 export async function GET(req: NextRequest) {
@@ -11,8 +12,9 @@ export async function GET(req: NextRequest) {
 
     const supabaseClient = supabase;
     const repository = new SbBoardRepository(supabaseClient);
+    const getPostDetailUseCase = new GetPostDetailUseCase(repository);
 
-    const post = await repository.getById(id);
+    const post = await getPostDetailUseCase.getPostById(id);
 
     if (!post) {
       return NextResponse.json({ message: '게시글을 찾을 수 없습니다.' }, { status: 404 });

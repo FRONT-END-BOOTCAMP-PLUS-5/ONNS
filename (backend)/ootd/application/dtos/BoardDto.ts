@@ -10,6 +10,8 @@ export interface BoardWithUser {
     name: string;
     profile_img: string;
   };
+  comment_count?: number;
+  like_count?: number;
   isMyPost: boolean;
 }
 
@@ -25,4 +27,6 @@ export interface RawBoardWithUser {
     name: string;
     profile_img: string;
   };
+  comment_count?: number;
+  like_count?: number;
 }

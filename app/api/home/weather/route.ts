@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// 카카오 API로 위치 주소 가져오기
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const lat = searchParams.get('lat');

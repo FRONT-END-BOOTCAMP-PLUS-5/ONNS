@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: '/api',
-  withCredentials: true,
 });
 
 let isRefreshing = false;
@@ -34,7 +33,6 @@ api.interceptors.response.use(
 
       const refreshAxios = axios.create({
         baseURL: '/api',
-        withCredentials: true,
         timeout: 10000,
       });
 

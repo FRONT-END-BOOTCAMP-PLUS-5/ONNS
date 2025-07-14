@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import NoticeItem from './components/NoticeItem';
 import api from '@/utils/axiosInstance';
+import { formatDate } from '@/lib/formatDate';
 import { NotificationWithUser } from '@/(backend)/notification/application/dtos/NotificationDto';
 
 export default function NotificationPage() {
@@ -60,7 +61,7 @@ export default function NotificationPage() {
           postId={notification.postId}
           type={notification.type}
           user={notification.actor.name}
-          timestamp={String(notification.dateCreated)}
+          timestamp={formatDate(notification.dateCreated)}
         />
       ))}
     </div>

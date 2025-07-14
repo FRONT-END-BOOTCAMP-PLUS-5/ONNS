@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 }
 
 /* 현재 계절 게시글 조회 */
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const supabaseClient = supabase;
     const repository = new SbBoardRepository(supabaseClient);
@@ -45,7 +45,10 @@ export async function GET() {
     const user = await getUserFromJWT();
     const myUserId = user?.id || 0;
 
-    const posts = await getPostUseCase.getAllPosts(myUserId);
+    const { searchParams } = new URL(req.url);
+    const sort = searchParams.get('sort');
+
+    const posts = await getPostUseCase.getAllPosts(myUserId, sort || undefined);
 
     return NextResponse.json(posts, { status: 200 });
   } catch (error) {

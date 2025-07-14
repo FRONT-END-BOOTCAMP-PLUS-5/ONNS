@@ -25,7 +25,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const posts = await seasonUseCase.getPostsBySeason(season);
+    const sort = searchParams.get('sort');
+    const posts = await seasonUseCase.getPostsBySeason(season, sort || undefined);
 
     return NextResponse.json(posts, { status: 200 });
   } catch (error) {

@@ -1,22 +1,23 @@
 import SbBoardRepository from '../../infrastructure/repositories/SbBoardRepositories';
 import Board from '../../domain/entities/Board';
 
-class UpdateUseCase {
+class GetPostDetailUseCase {
   private boardRepository: SbBoardRepository;
 
   constructor(boardRepository: SbBoardRepository) {
     this.boardRepository = boardRepository;
   }
 
-  async execute(id: string, updateData: Partial<Board>, userId: number): Promise<void> {
+  // 게시글 상세 조회
+  async getPostById(id: string): Promise<Board | null> {
     try {
-      // text 필드만 수정
-      await this.boardRepository.update(id, { text: updateData.text }, userId);
+      const post = await this.boardRepository.getById(id);
+      return post;
     } catch (error) {
-      console.error('Error updating board:', error);
+      console.error('Error fetching post detail:', error);
       throw error;
     }
   }
 }
 
-export default UpdateUseCase;
+export default GetPostDetailUseCase;

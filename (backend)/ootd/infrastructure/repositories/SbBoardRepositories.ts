@@ -5,22 +5,37 @@ import IBoardRepository from '../../domain/repositories/IBoradRepository';
 class SbBoardRepository implements IBoardRepository {
   constructor(private readonly supabase: SupabaseClient) {}
 
-  // 게시글 조회
-  async getAll(): Promise<Board[]> {
-    const { data, error } = await this.supabase.from('post').select(`*, photos:photo(img_url)`);
-    if (error) throw error;
-    return data;
-  }
-
-  // 게시글 상세 조회
+  // 게시글 상세 조회 (댓글 수, 좋아요 수 포함)
   async getById(id: string): Promise<Board | null> {
     const { data, error } = await this.supabase
       .from('post')
-      .select(`*, photos:photo(img_url)`)
+      .select(
+        `
+        *, 
+        photos:photo(img_url), 
+        user:user_id(id, name, profile_img),
+        comments:comment(count),
+        likes:likes(count)
+      `,
+      )
       .eq('id', id)
       .single();
+
     if (error) throw error;
-    return data;
+    if (!data) return null;
+
+    // 댓글 수와 좋아요 수 추가
+    const postWithCounts = {
+      ...data,
+      comment_count: data.comments?.[0]?.count || 0,
+      like_count: data.likes?.[0]?.count || 0,
+    };
+
+    // 불필요한 필드 제거
+    delete postWithCounts.comments;
+    delete postWithCounts.likes;
+
+    return postWithCounts;
   }
 
   // 게시글 생성
@@ -31,7 +46,7 @@ class SbBoardRepository implements IBoardRepository {
     }
     console.log('성공적으로 게시글 생성:', data);
 
-    // 2. 이미지들 저장 (있는 경우)
+    // 이미지 저장 (있는 경우)
     if (img_url && Array.isArray(img_url) && img_url.length > 0) {
       const photoData = img_url.map((imgUrl) => ({
         post_id: data.id,
@@ -45,63 +60,169 @@ class SbBoardRepository implements IBoardRepository {
       console.log('Successfully saved photos for board:', data.id);
     }
 
-    // 3. 생성된 게시글과 이미지를 함께 조회
+    // 게시글과 이미지를 함께 조회 (댓글 수, 좋아요 수 포함)
     const { data: fullData, error: fetchError } = await this.supabase
       .from('post')
-      .select(`*, photos:photo(img_url)`)
+      .select(
+        `
+        *, 
+        photos:photo(img_url), 
+        user:user_id(id, name, profile_img),
+        comments:comment(count),
+        likes:likes(count)
+      `,
+      )
       .eq('id', data.id)
       .single();
+
     if (fetchError) {
       console.error('Error fetching created board with photos:', fetchError);
       return data;
     }
-    return fullData;
+
+    // 댓글 수와 좋아요 수 추가
+    const postWithCounts = {
+      ...fullData,
+      comment_count: fullData.comments?.[0]?.count || 0,
+      like_count: fullData.likes?.[0]?.count || 0,
+    };
+
+    // 불필요한 필드 제거
+    delete postWithCounts.comments;
+    delete postWithCounts.likes;
+
+    return postWithCounts;
   }
 
   //게시글 수정(글 내용만 수정)
-  async update(id: string, updateData: Partial<Board>): Promise<void> {
+  async update(id: string, updateData: Partial<Board>, userId: number): Promise<void> {
+    // 권한 확인
+    const { data: post } = await this.supabase
+      .from('post')
+      .select('user_id')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
+
+    if (!post) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 수정 실행
     const { error } = await this.supabase
       .from('post')
       .update({ text: updateData.text })
       .eq('id', id);
     if (error) throw error;
-    // 변경 사항 출력
-    const { data: updated, error: selectError } = await this.supabase
-      .from('post')
-      .select('*')
-      .eq('id', id)
-      .single();
-    if (selectError) {
-      console.error('수정된 게시글 조회 실패:', selectError);
-    } else {
-      console.log('수정된 게시글:', updated);
-    }
   }
 
   /*게시글 삭제 */
-  async delete(id: string): Promise<void> {
-    try {
-      // 1. 게시글 이미지 삭제
-      const { error: photoError } = await this.supabase.from('photo').delete().eq('post_id', id);
+  async delete(id: string, userId: number): Promise<void> {
+    // 권한 확인
+    const { data: post } = await this.supabase
+      .from('post')
+      .select('user_id')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
 
-      if (photoError) {
-        console.error('이미지 삭제 실패:', photoError);
-        throw new Error(`이미지 삭제 실패: ${photoError.message}`);
-      }
-
-      // 2. 게시글 삭제
-      const { error: postError } = await this.supabase.from('post').delete().eq('id', id);
-
-      if (postError) {
-        console.error('게시글 삭제 실패:', postError);
-        throw new Error(`게시글 삭제 실패: ${postError.message}`);
-      }
-
-      console.log('삭제 성공:', id);
-    } catch (error) {
-      console.error('삭제 실패:', error);
-      throw error;
+    if (!post) {
+      throw new Error('권한이 없습니다.');
     }
+
+    // 이미지 삭제
+    await this.supabase.from('photo').delete().eq('post_id', id);
+
+    // 게시글 삭제
+    const { error } = await this.supabase.from('post').delete().eq('id', id);
+    if (error) throw error;
+  }
+
+  // 계절별 게시글 조회 (최신순 정렬, 댓글 수, 좋아요 수 포함)
+  async getBySeason(season: string): Promise<Board[]> {
+    const now = new Date();
+    const year = now.getFullYear();
+
+    let startMonth: number;
+    let endMonth: number;
+    let endYear = year;
+
+    switch (season) {
+      case '봄':
+        startMonth = 3;
+        endMonth = 5;
+        break;
+      case '여름':
+        startMonth = 6;
+        endMonth = 8;
+        break;
+      case '가을':
+        startMonth = 9;
+        endMonth = 11;
+        break;
+      case '겨울':
+        startMonth = 12;
+        endMonth = 2;
+        endYear = year + 1;
+        break;
+      default:
+        throw new Error('Invalid season');
+    }
+
+    const startDate = new Date(year, startMonth - 1, 1).toISOString();
+    const endDate = new Date(endYear, endMonth, 1).toISOString();
+
+    const { data, error } = await this.supabase
+      .from('post')
+      .select(
+        `
+        *, 
+        photos:photo(img_url), 
+        user:user_id(id, name, profile_img),
+        comments:comment(count),
+        likes:likes(count)
+      `,
+      )
+      .gte('date_created', startDate)
+      .lt('date_created', endDate)
+      .order('date_created', { ascending: false });
+
+    if (error) throw error;
+
+    // 각 게시글에 댓글 수와 좋아요 수 추가
+    return data.map((post) => ({
+      ...post,
+      comment_count: post.comments?.[0]?.count || 0,
+      like_count: post.likes?.[0]?.count || 0,
+      comments: undefined,
+      likes: undefined,
+    }));
+  }
+
+  // 현재 계절에 맞는 게시글 조회 (댓글 수, 좋아요 수 포함)
+  async getCurrentSeasonPosts(): Promise<Board[]> {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+
+    // 현재 월에 맞는 계절 결정
+    let season: string;
+    if (month >= 3 && month <= 5) {
+      season = '봄';
+    } else if (month >= 6 && month <= 8) {
+      season = '여름';
+    } else if (month >= 9 && month <= 11) {
+      season = '가을';
+    } else {
+      season = '겨울';
+    }
+
+    // 기존 getBySeason 로직 사용 (이미 최신순 정렬됨)
+    const posts = await this.getBySeason(season);
+
+    // 추가로 최신순 정렬 보장
+    return posts.sort(
+      (a, b) => new Date(b.date_created).getTime() - new Date(a.date_created).getTime(),
+    );
   }
 }
 

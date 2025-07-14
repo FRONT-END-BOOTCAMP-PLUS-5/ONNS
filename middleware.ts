@@ -7,7 +7,9 @@ export function middleware(request: NextRequest) {
 
   if (routes.some((route) => pathname.startsWith(route))) {
     const token = request.cookies.get('token');
-    if (!token) {
+    const refreshToken = request.cookies.get('refresh_token');
+
+    if (!token && !refreshToken) {
       const url = request.nextUrl.clone();
       url.pathname = '/';
       url.searchParams.set('login', '1');

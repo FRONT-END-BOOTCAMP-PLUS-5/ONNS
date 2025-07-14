@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
-import { Header, Nav } from './components';
+import { Nav } from './components';
+import HeaderClient from './components/HeaderClient';
 
 const pretendard = localFont({
   src: '../public/fonts/PretendardVariable.woff2',
@@ -28,7 +29,7 @@ export default function RootLayout({
         className={`${pretendard.className} flex flex-col min-h-screen w-[430px] mx-auto overflow-x-hidden relative`}
         style={{ backgroundColor: '#BFBFBF' }} // Tailwind's gray-50 hex value
       >
-        <Header />
+        <HeaderClient />
         <main className="flex-1 pb-24 bg-white">{children}</main>
         <Nav />
       </body>

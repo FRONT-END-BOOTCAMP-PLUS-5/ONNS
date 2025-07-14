@@ -7,9 +7,9 @@ class DeleteUseCase {
     this.boardRepository = boardRepository;
   }
 
-  async execute(id: string): Promise<void> {
+  async execute(id: string, userId: number): Promise<void> {
     try {
-      await this.boardRepository.delete(id);
+      await this.boardRepository.delete(id, userId);
     } catch (error) {
       console.error('게시글 삭제 실패:', error);
       throw error;

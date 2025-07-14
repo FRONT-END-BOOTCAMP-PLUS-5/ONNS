@@ -9,9 +9,9 @@ class SeasonUseCase {
   }
 
   // 계절별 게시글 조회
-  async getPostsBySeason(season: string): Promise<Board[]> {
+  async getPostsBySeason(season: string, sort?: string): Promise<Board[]> {
     try {
-      const boards = await this.boardRepository.getBySeason(season);
+      const boards = await this.boardRepository.getBySeason(season, sort);
       return boards;
     } catch (error) {
       console.error('Error fetching boards by season:', error);

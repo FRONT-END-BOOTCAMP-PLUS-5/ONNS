@@ -1,69 +1,87 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { getUserFromJWT } from '@/utils/auth/tokenAuth';
-import { supabase } from '@/utils/supabase/supabaseClient';
 import { SbUserRepository } from '@/(backend)/my/infrastructure/repositories/SbUserRepository';
 import { GetUserUseCase } from '@/(backend)/my/application/usecases/GetUserUseCase';
 import { UpdateUserUseCase } from '@/(backend)/my/application/usecases/UpdateUserUseCase';
+import { UserDeleteUseCase } from '@/(backend)/user/application/usecases/UserDeleteUseCase';
+import { supabase } from '@/utils/supabase/supabaseClient';
 
 // 회원 정보 조회
 export async function GET() {
-  const user = await getUserFromJWT();
-  if (!user) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+  try {
+    const user = await getUserFromJWT();
+    if (!user) {
+      return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userRepository = new SbUserRepository(supabase);
+    const getUserUseCase = new GetUserUseCase(userRepository);
+
+    const userData = await getUserUseCase.execute(user.id);
+
+    if (!userData) {
+      return NextResponse.json({ ok: false, error: '사용자를 찾을 수 없습니다.' }, { status: 404 });
+    }
+
+    return NextResponse.json({ ok: true, user: userData });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return NextResponse.json({ ok: false, error: '서버 에러' }, { status: 500 });
   }
-
-  const repository = new SbUserRepository(supabase);
-  const getUserUseCase = new GetUserUseCase(repository);
-
-  const userData = await getUserUseCase.execute(user.id);
-
-  if (!userData) {
-    return NextResponse.json({ ok: false, error: 'User not found' }, { status: 404 });
-  }
-
-  return NextResponse.json({ ok: true, user: userData });
 }
 
 // 회원 정보 수정
-export async function PATCH(request: Request) {
-  const user = await getUserFromJWT();
-  if (!user) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+export async function PATCH(req: NextRequest) {
+  try {
+    const user = await getUserFromJWT();
+    if (!user) {
+      return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { name, profile_img } = body;
+
+    const userRepository = new SbUserRepository(supabase);
+    const updateUserUseCase = new UpdateUserUseCase(userRepository);
+
+    const updatedUser = await updateUserUseCase.execute(user.id, { name, profile_img });
+
+    if (!updatedUser) {
+      return NextResponse.json(
+        { ok: false, error: '사용자 정보 수정에 실패했습니다.' },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ ok: true, user: updatedUser });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    return NextResponse.json({ ok: false, error: '서버 에러' }, { status: 500 });
   }
+}
 
-  const body = await request.json();
+// 회원탈퇴
+export async function DELETE() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
 
-  // First, get current user data
-  const repository = new SbUserRepository(supabase);
-  const getUserUseCase = new GetUserUseCase(repository);
-  const currentUser = await getUserUseCase.execute(user.id);
+    if (!token) {
+      return NextResponse.json({ success: false, message: '토큰이 없습니다.' }, { status: 401 });
+    }
 
-  if (!currentUser) {
-    return NextResponse.json({ ok: false, error: 'User not found' }, { status: 404 });
+    const userDeleteUseCase = new UserDeleteUseCase();
+
+    const result = await userDeleteUseCase.execute(token);
+
+    // 쿠키 삭제
+    const response = NextResponse.json(result);
+    response.cookies.set('token', '', { maxAge: 0, path: '/' });
+
+    return response;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '회원탈퇴 중 오류가 발생했습니다.';
+    return NextResponse.json({ success: false, message }, { status: 500 });
   }
-
-  // Only update fields that are provided and different from current values
-  const updateFields: { name?: string; profile_img?: string } = {};
-
-  if (body.name !== undefined && body.name !== currentUser.name) {
-    updateFields.name = body.name;
-  }
-
-  if (body.profile_img !== undefined && body.profile_img !== currentUser.profile_img) {
-    updateFields.profile_img = body.profile_img;
-  }
-
-  // If no fields need updating, return current user data
-  if (Object.keys(updateFields).length === 0) {
-    return NextResponse.json({ ok: true, user: currentUser, message: 'No changes detected' });
-  }
-
-  const updateUserUseCase = new UpdateUserUseCase(repository);
-  const updatedUser = await updateUserUseCase.execute(user.id, updateFields);
-
-  if (!updatedUser) {
-    return NextResponse.json({ ok: false, error: 'Failed to update user' }, { status: 500 });
-  }
-
-  return NextResponse.json({ ok: true, user: updatedUser });
 }

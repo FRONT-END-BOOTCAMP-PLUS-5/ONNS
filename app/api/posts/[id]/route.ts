@@ -5,10 +5,10 @@ import { getUserFromJWT } from '@/utils/auth/tokenAuth';
 import GetPostDetailUseCase from '@/(backend)/ootd/application/usecases/GetPostDetailUseCase';
 
 /* 특정 게시글 조회 */
-export async function GET(req: NextRequest) {
+export async function GET({ params }: { params: Promise<{ id: string }> }) {
   try {
-    const segments = req.nextUrl.pathname.split('/');
-    const id = segments[segments.length - 1];
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
 
     const supabaseClient = supabase;
     const repository = new SbBoardRepository(supabaseClient);
@@ -31,15 +31,15 @@ export async function GET(req: NextRequest) {
 }
 
 /* 게시글 수정 */
-export async function PUT(req: NextRequest) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getUserFromJWT();
     if (!user) {
       return NextResponse.json({ message: '로그인이 필요합니다.' }, { status: 401 });
     }
 
-    const segments = req.nextUrl.pathname.split('/');
-    const id = segments[segments.length - 1];
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
 
     const body = await req.json();
     const { text } = body;
@@ -63,15 +63,15 @@ export async function PUT(req: NextRequest) {
 }
 
 /* 게시글 삭제 */
-export async function DELETE(req: NextRequest) {
+export async function DELETE({ params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getUserFromJWT();
     if (!user) {
       return NextResponse.json({ message: '로그인이 필요합니다.' }, { status: 401 });
     }
 
-    const segments = req.nextUrl.pathname.split('/');
-    const id = segments[segments.length - 1];
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
 
     const supabaseClient = supabase;
     const repository = new SbBoardRepository(supabaseClient);

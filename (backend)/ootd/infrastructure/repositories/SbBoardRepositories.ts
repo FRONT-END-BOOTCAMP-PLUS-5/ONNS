@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import Board from '../../domain/entities/Board';
-import IBoardRepository from '../../domain/repositories/IBoradRepository';
+import Board from '@/(backend)/ootd/domain/entities/Board';
+import IBoardRepository from '@/(backend)/ootd/domain/repositories/IBoradRepository';
 
 class SbBoardRepository implements IBoardRepository {
   constructor(private readonly supabase: SupabaseClient) {}
@@ -155,7 +155,7 @@ class SbBoardRepository implements IBoardRepository {
   }
 
   // 계절별 게시글 조회 (최신순 정렬, 댓글 수, 좋아요 수 포함)
-  async getBySeason(season: string): Promise<Board[]> {
+  async getBySeason(season: string, sort?: string, min?: number, max?: number): Promise<Board[]> {
     const now = new Date();
     const year = now.getFullYear();
 
@@ -202,7 +202,7 @@ class SbBoardRepository implements IBoardRepository {
     if (error) throw error;
 
     // 각 게시글에 댓글 수와 좋아요 수 추가
-    return data.map((post) => ({
+    const postsWithCounts = data.map((post) => ({
       ...post,
       comment_count: post.comments?.[0]?.count || 0,
       like_count: post.likes?.[0]?.count || 0,
@@ -246,6 +246,65 @@ class SbBoardRepository implements IBoardRepository {
     }
 
     return posts;
+  }
+
+  // 랜덤 게시글 조회
+  async getRandomPosts(limit: number): Promise<Board[]> {
+    const { data, error } = await this.supabase
+      .from('post')
+      .select(
+        `
+        *, 
+        photos:photo(img_url), 
+        user:user_id(id, name, profile_img),
+        comments:comment(count),
+        likes:likes(count)
+      `,
+      )
+      .order('date_created', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+
+    return data.map((post) => ({
+      ...post,
+      comment_count: post.comments?.[0]?.count || 0,
+      like_count: post.likes?.[0]?.count || 0,
+      comments: undefined,
+      likes: undefined,
+    }));
+  }
+
+  // 가장 좋아요가 많은 게시글 조회
+  async getMostLikedPosts(limit: number): Promise<Board[]> {
+    const { data, error } = await this.supabase
+      .from('post')
+      .select(
+        `
+        *, 
+        photos:photo(img_url), 
+        user:user_id(id, name, profile_img),
+        comments:comment(count),
+        likes:likes(count)
+      `,
+      )
+      .order('date_created', { ascending: false });
+
+    if (error) throw error;
+
+    // 댓글 수와 좋아요 수 추가
+    const postsWithCounts = data.map((post) => ({
+      ...post,
+      comment_count: post.comments?.[0]?.count || 0,
+      like_count: post.likes?.[0]?.count || 0,
+      comments: undefined,
+      likes: undefined,
+    }));
+
+    // 좋아요 수로 정렬하고 limit 적용
+    return postsWithCounts
+      .sort((a, b) => (b.like_count || 0) - (a.like_count || 0))
+      .slice(0, limit);
   }
 }
 

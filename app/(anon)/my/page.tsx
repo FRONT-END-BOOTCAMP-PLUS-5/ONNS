@@ -16,7 +16,7 @@ export default function My() {
   useEffect(() => {
     const fetchProfileInfo = async () => {
       try {
-        const res = await api.get('/my/me');
+        const res = await api.get('users/me');
 
         if (res.data.ok && res.data.user) {
           setUserName(res.data.user.name);

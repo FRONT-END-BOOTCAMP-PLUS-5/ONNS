@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUserFromJWT } from '@/utils/auth/tokenAuth';
-import { SbNotiRepository } from '@/(backend)/notification/infrastructure/repositories/SbNotiRepository';
-import { MarkAsReadUseCase } from '@/(backend)/notification/application/usecases/MarkAsReadUseCase';
+import { SbNotiRepository } from '@/(backend)/notifications/infrastructure/repositories/SbNotiRepository';
+import { MarkAsReadUseCase } from '@/(backend)/notifications/application/usecases/MarkAsReadUseCase';
 
 // 알림 읽음 상태 변경 (PATCH)
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {

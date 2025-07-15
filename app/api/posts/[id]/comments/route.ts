@@ -1,9 +1,9 @@
 import { supabase } from '@/utils/supabase/supabaseClient';
 import { NextRequest, NextResponse } from 'next/server';
-import SbCommentRepository from '@/(backend)/comment/infrastructure/repositories/SbCommentRepository';
-import GetCommentUseCase from '@/(backend)/comment/application/usecases/GetCommentUseCase';
+import SbCommentRepository from '@/(backend)/comments/infrastructure/repositories/SbCommentRepository';
+import GetCommentUseCase from '@/(backend)/comments/application/usecases/GetCommentUseCase';
 import { getUserFromJWT } from '@/utils/auth/tokenAuth';
-import PostCommentUseCase from '@/(backend)/comment/application/usecases/PostCommentUseCase';
+import PostCommentUseCase from '@/(backend)/comments/application/usecases/PostCommentUseCase';
 
 // 게시글 댓글 조회 API
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

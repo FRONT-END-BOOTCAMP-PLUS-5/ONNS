@@ -90,7 +90,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ type }) => {
               alt={photo.alt}
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 50vw, 33vw"
+              sizes="(max-width: 430px) 50vw, 33vw"
             />
           </div>
         ))}

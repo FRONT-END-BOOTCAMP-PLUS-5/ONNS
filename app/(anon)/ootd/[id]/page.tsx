@@ -1,17 +1,31 @@
 'use client';
 
+import React, { useState, useRef } from 'react';
 import PostUserInfo from '@/app/(anon)/ootd/[id]/components/PostUserInfo';
 import Image from 'next/image';
 // import Heart from '@/public/assets/icons/heart.svg';
 import StrokeHeart from '@/public/assets/icons/stroke_heart.svg';
 import StrokeComment from '@/public/assets/icons/stroke_comment.svg';
 import CommentBox from '@/app/(anon)/ootd/[id]/components/CommentBox';
+import Input from './components/Input';
 
 //ootd detail
 export default function OotdDetail() {
   // 프로필 이미지, 닉네임
   // 게시글 이미지, 텍스트, 좋아요 수, 댓글 수, 내 포스트인지 여부
   // 댓글 작성자 프로필 이미지, 닉네임, 댓글 내용, 내 댓글인지 여부
+  const [comment, setComment] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setComment(e.target.value);
+  };
+
+  const handleReply = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
 
   return (
     <>
@@ -50,6 +64,7 @@ export default function OotdDetail() {
               content: '감사합니다! 장마철엔 우산 꼭 챙기세요 ☔️',
             },
           ]}
+          onReply={handleReply}
         />
         <CommentBox
           profile_image={''}
@@ -57,8 +72,10 @@ export default function OotdDetail() {
           isMyComment={true}
           createdAt={'7/15 17:50'}
           content={'코디 ㄹㅇ 너무 좋아요'}
+          onReply={handleReply}
         />
       </div>
+      <Input value={comment} onChange={handleChange} inputRef={inputRef} />
     </>
   );
 }

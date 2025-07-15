@@ -20,7 +20,7 @@ const CommentBox = ({
   isChild = false,
   createdAt,
   content,
-  // onReply,
+  onReply,
   // onDelete,
   replies,
 }: CommentProps) => {
@@ -45,7 +45,9 @@ const CommentBox = ({
           <div className="text-[14px] text-gray-800 mt-0.5">{content}</div>
           <div className="flex items-center gap-2 mt-1">
             {!isChild && (
-              <button className="text-xs text-gray-400 hover:underline">답글 달기</button>
+              <button className="text-xs text-gray-400 hover:underline" onClick={onReply}>
+                답글 달기
+              </button>
             )}
           </div>
           {/* 대댓글(자식 댓글) */}

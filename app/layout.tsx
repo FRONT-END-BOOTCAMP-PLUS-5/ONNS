@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${pretendard.className} flex flex-col min-h-screen max-w-[430px] w-full mx-auto overflow-x-hidden relative`}
+        className={`${pretendard.className} overflow-x-hidden flex flex-col min-h-screen max-w-[430px] w-full mx-auto overflow-x-hidden relative`}
         style={{ backgroundColor: '#BFBFBF' }}
       >
         <HeaderClient />

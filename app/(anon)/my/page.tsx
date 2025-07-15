@@ -32,7 +32,7 @@ export default function My() {
   }, []);
 
   return (
-    <div className="w-[430px] h-[100vh]">
+    <div className="w-full h-[100vh]">
       {isEdit ? (
         <ProfileEditHeader profilePicture={profilePicture} userName={userName} />
       ) : (

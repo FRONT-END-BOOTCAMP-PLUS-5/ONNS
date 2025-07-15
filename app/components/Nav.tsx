@@ -10,9 +10,18 @@ interface NavProps {
   className?: string;
 }
 
+function shouldHideNav(pathname?: string) {
+  if (!pathname) return false;
+  if (['/ootd/write', '/notification'].includes(pathname)) return true;
+  if (/^\/ootd\/[^/]+$/.test(pathname)) return true; // /ootd/[id]
+  return false;
+}
+
 const Nav: React.FC<NavProps> = ({ className = '' }) => {
   const pathname = usePathname();
   const router = useRouter();
+
+  if (shouldHideNav(pathname)) return null;
 
   const isOOTDActive = pathname === '/ootd';
   const isMyActive = pathname === '/my';
@@ -20,9 +29,9 @@ const Nav: React.FC<NavProps> = ({ className = '' }) => {
 
   return (
     <div
-      className={`flex flex-col justify-center w-[430px] h-[100px] bg-white shadow-[0px_-8px_16px_0px_rgba(34,34,34,0.10)] ${className}`}
+      className={`fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col h-[100px] bg-white shadow-[0px_-8px_16px_0px_rgba(34,34,34,0.10)] z-50 max-w-[430px] w-full mx-auto ${className}`}
     >
-      <div className="flex justify-center gap-x-[80px] items-center h-full mt-[24px] mb-[21.26px]">
+      <div className="flex justify-around items-center h-full mt-[24px] mb-[21.26px]">
         <button
           onClick={() => router.push('/ootd')}
           className="flex flex-col justify-center items-center w-[53px]"

@@ -24,13 +24,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="">
+    <html lang="en">
       <body
-        className={`${pretendard.className} flex flex-col items-center h-screen overflow-x-hidden relative`}
-        style={{ backgroundColor: '#BFBFBF' }} // Tailwind's gray-50 hex value
+        className={`${pretendard.className} flex flex-col min-h-screen max-w-[430px] w-full mx-auto overflow-x-hidden relative`}
+        style={{ backgroundColor: '#BFBFBF' }}
       >
         <HeaderClient />
-        <main className="flex-1 bg-white w-[430px]">{children}</main>
+        <main className="flex-1 pb-24 bg-white w-full">{children}</main>
         <Nav />
       </body>
     </html>

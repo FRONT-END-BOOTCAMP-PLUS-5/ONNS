@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import Board from '../../domain/entities/Board';
-import IBoardRepository from '../../domain/repositories/IBoradRepository';
+import Board from '@/(backend)/ootd/domain/entities/Board';
+import IBoardRepository from '@/(backend)/ootd/domain/repositories/IBoradRepository';
 
 class SbBoardRepository implements IBoardRepository {
   constructor(private readonly supabase: SupabaseClient) {}
@@ -154,7 +154,7 @@ class SbBoardRepository implements IBoardRepository {
     if (error) throw error;
   }
 
-  // 계절별 게시글 조회 (정렬 옵션 포함)
+  // 계절별 게시글 조회 (최신순 정렬, 댓글 수, 좋아요 수 포함)
   async getBySeason(season: string, sort?: string, min?: number, max?: number): Promise<Board[]> {
     const now = new Date();
     const year = now.getFullYear();
@@ -210,6 +210,7 @@ class SbBoardRepository implements IBoardRepository {
       likes: undefined,
     }));
 
+    // 정렬 옵션에 따라 JavaScript에서 정렬
     if (sort === 'popular') {
       return postsWithCounts.sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
     }
@@ -217,35 +218,93 @@ class SbBoardRepository implements IBoardRepository {
     return postsWithCounts;
   }
 
-  // 현재 계절에 맞는 게시글 조회
-  async getCurrentSeasonPosts(
-    sort?: string,
-    season?: string,
-    min?: number,
-    max?: number,
-  ): Promise<Board[]> {
-    let targetSeason = season;
-    if (!targetSeason) {
-      const now = new Date();
-      const month = now.getMonth() + 1;
-      if (month >= 3 && month <= 5) {
-        targetSeason = '봄';
-      } else if (month >= 6 && month <= 8) {
-        targetSeason = '여름';
-      } else if (month >= 9 && month <= 11) {
-        targetSeason = '가을';
-      } else {
-        targetSeason = '겨울';
-      }
+  // 현재 계절에 맞는 게시글 조회 (정렬 옵션 포함)
+  async getCurrentSeasonPosts(sort?: string): Promise<Board[]> {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+
+    // 현재 월에 맞는 계절 결정
+    let season: string;
+    if (month >= 3 && month <= 5) {
+      season = '봄';
+    } else if (month >= 6 && month <= 8) {
+      season = '여름';
+    } else if (month >= 9 && month <= 11) {
+      season = '가을';
+    } else {
+      season = '겨울';
     }
 
-    const posts = await this.getBySeason(targetSeason, sort, min, max);
+    // 기존 getBySeason 로직 사용 (정렬 옵션 전달)
+    const posts = await this.getBySeason(season, sort);
+
+    // 추가로 최신순 정렬 보장 (인기순이 아닌 경우에만)
     if (sort !== 'popular') {
       return posts.sort(
         (a, b) => new Date(b.date_created).getTime() - new Date(a.date_created).getTime(),
       );
     }
+
     return posts;
+  }
+
+  // 랜덤 게시글 조회
+  async getRandomPosts(limit: number): Promise<Board[]> {
+    const { data, error } = await this.supabase
+      .from('post')
+      .select(
+        `
+        *, 
+        photos:photo(img_url), 
+        user:user_id(id, name, profile_img),
+        comments:comment(count),
+        likes:likes(count)
+      `,
+      )
+      .order('date_created', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+
+    return data.map((post) => ({
+      ...post,
+      comment_count: post.comments?.[0]?.count || 0,
+      like_count: post.likes?.[0]?.count || 0,
+      comments: undefined,
+      likes: undefined,
+    }));
+  }
+
+  // 가장 좋아요가 많은 게시글 조회
+  async getMostLikedPosts(limit: number): Promise<Board[]> {
+    const { data, error } = await this.supabase
+      .from('post')
+      .select(
+        `
+        *, 
+        photos:photo(img_url), 
+        user:user_id(id, name, profile_img),
+        comments:comment(count),
+        likes:likes(count)
+      `,
+      )
+      .order('date_created', { ascending: false });
+
+    if (error) throw error;
+
+    // 댓글 수와 좋아요 수 추가
+    const postsWithCounts = data.map((post) => ({
+      ...post,
+      comment_count: post.comments?.[0]?.count || 0,
+      like_count: post.likes?.[0]?.count || 0,
+      comments: undefined,
+      likes: undefined,
+    }));
+
+    // 좋아요 수로 정렬하고 limit 적용
+    return postsWithCounts
+      .sort((a, b) => (b.like_count || 0) - (a.like_count || 0))
+      .slice(0, limit);
   }
 }
 

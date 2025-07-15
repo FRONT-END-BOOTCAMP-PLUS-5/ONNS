@@ -29,31 +29,31 @@ const Nav: React.FC<NavProps> = ({ className = '' }) => {
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 flex flex-col justify-center w-[430px] mx-auto h-[100px] bg-white shadow-[0px_-8px_16px_0px_rgba(34,34,34,0.10)] z-50 ${className}`}
+      className={`fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col h-[100px] bg-white shadow-[0px_-8px_16px_0px_rgba(34,34,34,0.10)] z-50 max-w-[430px] w-full mx-auto ${className}`}
     >
-      <div className="flex justify-center gap-x-[80px] items-center h-full mt-[24px] mb-[21.26px]">
+      <div className="flex justify-around items-center h-full mt-[24px] mb-[21.26px]">
         <button
           onClick={() => router.push('/ootd')}
-          className="flex flex-col justify-center items-center w-[53px]"
+          className="flex flex-col justify-center items-center text-sm w-[53px] h-[48px]"
         >
-          <OOTD width={36} height={31} className="" fill={isOOTDActive ? '#6A71E5' : 'white'} />
-          <span className="text-[12px] mt-[6px] h-[16px] font-semibold text-[#202020]">OOTD</span>
+          <OOTD width={28} height={24} fill={isOOTDActive ? '#6A71E5' : 'white'} />
+          <span className="text-[16px] font-medium leading-normal text-[#202020]">OOTD</span>
         </button>
 
         <button
           onClick={() => router.push('/')}
-          className="flex flex-col justify-center items-center w-[47px]"
+          className="flex flex-col justify-center items-center text-sm w-[47px] h-[48px]"
         >
-          <HOME width={36} height={31} fill={isHomeActive ? '#6A71E5' : 'white'} />
-          <span className="text-[12px] mt-[6px] h-[16px] font-semibold text-[#202020]">HOME</span>
+          <HOME width={23} height={25} fill={isHomeActive ? '#6A71E5' : 'white'} />
+          <span className="text-[16px] font-medium leading-normal text-[#202020]">HOME</span>
         </button>
 
         <button
           onClick={() => router.push('/my')}
-          className="flex flex-col justify-center items-center w-[53px]"
+          className="flex flex-col justify-center items-center text-sm w-[53px] h-[48px]"
         >
-          <MY width={36} height={31} fill={isMyActive ? '#6A71E5' : 'white'} />
-          <span className="text-[12px] mt-[6px] h-[16px] font-semibold text-[#202020]">MY</span>
+          <MY width={20} height={24} fill={isMyActive ? '#6A71E5' : 'white'} />
+          <span className="text-[16px] font-medium leading-normal text-[#202020]">MY</span>
         </button>
       </div>
     </div>

@@ -17,7 +17,7 @@ const Header = ({
   isGoBack = false,
   isClose = false,
   isHome = false,
-  hasUnreadNotification = false,
+  hasUnreadNotification,
 }: HeaderProps) => {
   const router = useRouter();
 
@@ -49,7 +49,9 @@ const Header = ({
         onClick={handleRightClick}
       >
         {isClose && <Close />}
-        {isHome && (hasUnreadNotification ? <NotificationUnread /> : <Notification />)}
+        {isHome &&
+          hasUnreadNotification !== undefined &&
+          (hasUnreadNotification ? <NotificationUnread /> : <Notification />)}
       </button>
     </div>
   );

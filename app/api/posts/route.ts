@@ -5,7 +5,7 @@ import SbBoardRepository from '@/(backend)/ootd/infrastructure/repositories/SbBo
 import GetRandomPostsUseCase from '@/(backend)/ootd/application/usecases/GetRandomPostsUseCase';
 import GetMostLikedPostsUseCase from '@/(backend)/ootd/application/usecases/GetMostLikedPostsUseCase';
 import CreateUseCase from '@/(backend)/ootd/application/usecases/CreateUseCase';
-// import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostUseCase';
+import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostUseCase';
 
 /* 게시글 조회 (다양한 정렬 및 필터링) */
 export async function GET(req: NextRequest) {
@@ -42,11 +42,11 @@ export async function GET(req: NextRequest) {
         message = '인기 게시글을 성공적으로 조회했습니다.';
         break;
 
-      // case 'recent':
-      //   const getRecentPostsUseCase = new GetPostUseCase(boardRepository);
-      //   posts = await getRecentPostsUseCase.getAllPosts(user.id, sort, season || undefined);
-      //   message = '최신 게시글을 성공적으로 조회했습니다.';
-      //   break;
+      case 'recent':
+        const getRecentPostsUseCase = new GetPostUseCase(boardRepository);
+        posts = await getRecentPostsUseCase.getAllPosts(user.id, sort, season || undefined);
+        message = '최신 게시글을 성공적으로 조회했습니다.';
+        break;
       default:
         if (season) {
           // Get posts by specific season

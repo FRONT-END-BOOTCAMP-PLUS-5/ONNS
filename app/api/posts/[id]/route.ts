@@ -5,7 +5,7 @@ import { getUserFromJWT } from '@/utils/auth/tokenAuth';
 import GetPostDetailUseCase from '@/(backend)/ootd/application/usecases/GetPostDetailUseCase';
 
 /* 특정 게시글 조회 */
-export async function GET({ params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const resolvedParams = await params;
     const id = resolvedParams.id;
@@ -63,7 +63,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 /* 게시글 삭제 */
-export async function DELETE({ params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getUserFromJWT();
     if (!user) {

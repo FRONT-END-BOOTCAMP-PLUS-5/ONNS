@@ -1,14 +1,8 @@
 'use client';
-import OotdFilter from "./components/OotdFilter";
-
+import OotdSeasonDropdown from './components/SeasonFilter/OotdSeasonDropdown';
 
 const Ootd = () => {
+  return <OotdSeasonDropdown />;
+};
 
-
-  return (
-   <OotdFilter/>
-  )
-
-}
-
-export default Ootd;  
+export default Ootd;

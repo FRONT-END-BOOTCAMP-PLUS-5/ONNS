@@ -52,24 +52,23 @@ const NoticeItem: React.FC<NoticeItemProps> = ({ type, user, timestamp, isRead, 
     }
   };
 
-  const backgroundColor = isRead ? 'bg-white' : 'bg-[#9CAFFC]/10';
-
   return (
     <>
       <div
-        className={`self-stretch h-20 px-5 py-3 inline-flex flex-col justify-center items-start gap-2.5 cursor-pointer hover:opacity-80 transition-opacity ${backgroundColor}`}
+        className={`self-stretch h-[80px] px-[20px] flex flex-col justify-center items-start gap-[8px] cursor-pointer active:opacity-80
+    ${isRead ? 'bg-white' : 'bg-[#9CAFFC]/10'}`}
         onClick={handleClick}
       >
-        <div className="self-stretch inline-flex justify-start items-center gap-2">
-          <div className="w-11 h-11 bg-white rounded-full outline outline-[var(--e100)] flex justify-center items-center gap-2.5">
+        <div className="flex justify-start items-center gap-[8px]">
+          <div className="w-[45px] h-[45px] bg-white rounded-full outline outline-[var(--e100)] flex justify-center items-center gap-2.5">
             {getIcon()}
           </div>
-          <div className="flex-1 inline-flex flex-col justify-center items-start gap-1">
-            <div className="px-1 inline-flex justify-center items-center gap-2.5">
+          <div className="flex-1 flex flex-col justify-center gap-[4px]">
+            <div className="px-[4px] flex items-center">
               <div className="text-center justify-start text-[16px] text-black">{getText()}</div>
             </div>
-            <div className="self-stretch px-1 inline-flex justify-start items-center gap-2.5">
-              <div className="text-center justify-start text-[#949494] text-xs font-normal">
+            <div className="self-stretch px-[4px] inline-flex justify-start items-center">
+              <div className="text-center justify-start text-[#949494] text-[13px]">
                 {timestamp}
               </div>
             </div>

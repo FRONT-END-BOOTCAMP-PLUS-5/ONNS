@@ -1,0 +1,188 @@
+{
+  "info": {
+    "name": "OOTD 권한 테스트",
+    "description": "게시글 수정/삭제 권한 테스트",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "JWT_TOKEN",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "게시글 수정 테스트",
+      "item": [
+        {
+          "name": "본인 게시글 수정 (성공)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"본인_게시글_ID\",\n  \"text\": \"수정된 내용입니다\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/ootd",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "ootd"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "다른 사용자 게시글 수정 (403 에러)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"다른사용자_게시글_ID\",\n  \"text\": \"수정 시도\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/ootd",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "ootd"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "토큰 없이 수정 시도 (401 에러)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"게시글_ID\",\n  \"text\": \"수정 시도\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/ootd",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "ootd"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "게시글 삭제 테스트",
+      "item": [
+        {
+          "name": "본인 게시글 삭제 (성공)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/ootd?id=본인_게시글_ID",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "ootd"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "본인_게시글_ID"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "다른 사용자 게시글 삭제 (403 에러)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/ootd?id=다른사용자_게시글_ID",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "ootd"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "다른사용자_게시글_ID"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "토큰 없이 삭제 시도 (401 에러)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/ootd?id=게시글_ID",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "ootd"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "게시글_ID"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "게시글 조회 (isMyPost 확인)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{JWT_TOKEN}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/ootd",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "ootd"]
+        }
+      },
+      "response": []
+    }
+  ]
+} 

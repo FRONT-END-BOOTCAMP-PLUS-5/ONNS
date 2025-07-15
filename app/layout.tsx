@@ -25,12 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${pretendard.className} flex flex-col min-h-screen w-[430px] mx-auto overflow-x-hidden relative`}
-        style={{ backgroundColor: '#BFBFBF' }} // Tailwind's gray-50 hex value
-      >
+      <body className={`${pretendard.className} bg-white flex flex-col min-h-screen`}>
         <HeaderClient />
-        <main className="flex-1 pb-24 bg-white">{children}</main>
+        <main className="flex-1 pb-24">{children}</main>
         <Nav />
       </body>
     </html>

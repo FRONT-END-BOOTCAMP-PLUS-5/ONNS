@@ -10,9 +10,18 @@ interface NavProps {
   className?: string;
 }
 
+function shouldHideNav(pathname?: string) {
+  if (!pathname) return false;
+  if (['/ootd/write', '/notification'].includes(pathname)) return true;
+  if (/^\/ootd\/[^/]+$/.test(pathname)) return true; // /ootd/[id]
+  return false;
+}
+
 const Nav: React.FC<NavProps> = ({ className = '' }) => {
   const pathname = usePathname();
   const router = useRouter();
+
+  if (shouldHideNav(pathname)) return null;
 
   const isOOTDActive = pathname === '/ootd';
   const isMyActive = pathname === '/my';

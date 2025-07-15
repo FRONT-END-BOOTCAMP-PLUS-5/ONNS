@@ -10,15 +10,18 @@ class GetPostUseCase {
   }
 
   // 현재 계절 게시글 조회
-  async getAllPosts(
-    myUserId: number,
-    sort?: string,
-    season?: string,
-    min?: number,
-    max?: number,
-  ): Promise<BoardWithUser[]> {
+  async getAllPosts(myUserId: number, sort?: string, season?: string): Promise<BoardWithUser[]> {
     try {
-      const boards = await this.boardRepository.getCurrentSeasonPosts(sort, season, min, max);
+      let boards;
+
+      if (season) {
+        // 특정 계절 게시글 조회
+        boards = await this.boardRepository.getBySeason(season, sort);
+      } else {
+        // 현재 계절 게시글 조회
+        boards = await this.boardRepository.getCurrentSeasonPosts(sort);
+      }
+
       return boards.map((board) => BoardMapper.toDomain(board, myUserId));
     } catch (error) {
       console.error('Error fetching boards:', error);

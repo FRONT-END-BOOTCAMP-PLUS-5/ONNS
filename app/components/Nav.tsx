@@ -34,26 +34,26 @@ const Nav: React.FC<NavProps> = ({ className = '' }) => {
       <div className="flex justify-around items-center h-full mt-[24px] mb-[21.26px]">
         <button
           onClick={() => router.push('/ootd')}
-          className="flex flex-col justify-center items-center w-[53px]"
+          className="flex flex-col justify-center items-center text-sm w-[53px] h-[48px]"
         >
-          <OOTD width={36} height={31} className="" fill={isOOTDActive ? '#6A71E5' : 'white'} />
-          <span className="text-[12px] mt-[6px] h-[16px] font-semibold text-[#202020]">OOTD</span>
+          <OOTD width={28} height={24} fill={isOOTDActive ? '#6A71E5' : 'white'} />
+          <span className="text-[16px] font-medium leading-normal text-[#202020]">OOTD</span>
         </button>
 
         <button
           onClick={() => router.push('/')}
-          className="flex flex-col justify-center items-center w-[47px]"
+          className="flex flex-col justify-center items-center text-sm w-[47px] h-[48px]"
         >
-          <HOME width={36} height={31} fill={isHomeActive ? '#6A71E5' : 'white'} />
-          <span className="text-[12px] mt-[6px] h-[16px] font-semibold text-[#202020]">HOME</span>
+          <HOME width={23} height={25} fill={isHomeActive ? '#6A71E5' : 'white'} />
+          <span className="text-[16px] font-medium leading-normal text-[#202020]">HOME</span>
         </button>
 
         <button
           onClick={() => router.push('/my')}
-          className="flex flex-col justify-center items-center w-[53px]"
+          className="flex flex-col justify-center items-center text-sm w-[53px] h-[48px]"
         >
-          <MY width={36} height={31} fill={isMyActive ? '#6A71E5' : 'white'} />
-          <span className="text-[12px] mt-[6px] h-[16px] font-semibold text-[#202020]">MY</span>
+          <MY width={20} height={24} fill={isMyActive ? '#6A71E5' : 'white'} />
+          <span className="text-[16px] font-medium leading-normal text-[#202020]">MY</span>
         </button>
       </div>
     </div>

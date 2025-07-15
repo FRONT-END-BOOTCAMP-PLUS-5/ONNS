@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import Arrow from '@/public/assets/icons/arrow.svg';
 

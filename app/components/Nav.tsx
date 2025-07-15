@@ -20,7 +20,7 @@ const Nav: React.FC<NavProps> = ({ className = '' }) => {
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 flex flex-col justify-center w-[430px] mx-auto h-[100px] bg-white shadow-[0px_-8px_16px_0px_rgba(34,34,34,0.10)] z-50 ${className}`}
+      className={`flex flex-col justify-center w-[430px] h-[100px] bg-white shadow-[0px_-8px_16px_0px_rgba(34,34,34,0.10)] ${className}`}
     >
       <div className="flex justify-center gap-x-[80px] items-center h-full mt-[24px] mb-[21.26px]">
         <button

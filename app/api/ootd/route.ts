@@ -46,9 +46,22 @@ export async function GET(req: NextRequest) {
     const myUserId = user?.id || 0;
 
     const { searchParams } = new URL(req.url);
+    const season = searchParams.get('season');
     const sort = searchParams.get('sort');
+    const min = searchParams.get('min');
+    const max = searchParams.get('max');
 
-    const posts = await getPostUseCase.getAllPosts(myUserId, sort || undefined);
+    // min, max는 string이므로 number로 변환
+    const minNum = min !== null ? Number(min) : undefined;
+    const maxNum = max !== null ? Number(max) : undefined;
+
+    const posts = await getPostUseCase.getAllPosts(
+      myUserId,
+      sort || undefined,
+      season || undefined,
+      minNum,
+      maxNum,
+    );
 
     return NextResponse.json(posts, { status: 200 });
   } catch (error) {

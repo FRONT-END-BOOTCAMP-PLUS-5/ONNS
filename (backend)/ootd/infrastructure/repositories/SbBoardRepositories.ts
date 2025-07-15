@@ -5,7 +5,7 @@ import IBoardRepository from '../../domain/repositories/IBoradRepository';
 class SbBoardRepository implements IBoardRepository {
   constructor(private readonly supabase: SupabaseClient) {}
 
-  // 게시글 상세 조회 (댓글 수, 좋아요 수 포함)
+  // 게시글 상세 조회
   async getById(id: string): Promise<Board | null> {
     const { data, error } = await this.supabase
       .from('post')
@@ -31,7 +31,6 @@ class SbBoardRepository implements IBoardRepository {
       like_count: data.likes?.[0]?.count || 0,
     };
 
-    // 불필요한 필드 제거
     delete postWithCounts.comments;
     delete postWithCounts.likes;
 
@@ -39,12 +38,31 @@ class SbBoardRepository implements IBoardRepository {
   }
 
   // 게시글 생성
-  async create(board: Omit<Board, 'id' | 'date_created'>, img_url?: string[]): Promise<Board> {
-    const { data } = await this.supabase.from('post').insert([board]).select().single();
+  async create(
+    board: Omit<
+      Board,
+      | 'id'
+      | 'date_created'
+      | 'comment_count'
+      | 'like_count'
+      | 'photos'
+      | 'user'
+      | 'comments'
+      | 'likes'
+    >,
+    img_url?: string[],
+  ): Promise<Board> {
+    const insertData = {
+      text: board.text,
+      feels_like: board.feels_like,
+      user_id: board.user_id,
+    };
+
+    const { data, error } = await this.supabase.from('post').insert([insertData]).select().single();
+    if (error) throw error;
     if (!data) {
       throw new Error('데이터 반환 없음');
     }
-    console.log('성공적으로 게시글 생성:', data);
 
     // 이미지 저장 (있는 경우)
     if (img_url && Array.isArray(img_url) && img_url.length > 0) {
@@ -54,13 +72,11 @@ class SbBoardRepository implements IBoardRepository {
       }));
       const { error: photoError } = await this.supabase.from('photo').insert(photoData);
       if (photoError) {
-        console.error('Error saving photos:', photoError);
         throw new Error(`Failed to save photos: ${photoError.message}`);
       }
-      console.log('Successfully saved photos for board:', data.id);
     }
 
-    // 게시글과 이미지를 함께 조회 (댓글 수, 좋아요 수 포함)
+    // 게시글과 이미지를 함께 조회
     const { data: fullData, error: fetchError } = await this.supabase
       .from('post')
       .select(
@@ -143,36 +159,26 @@ class SbBoardRepository implements IBoardRepository {
     const now = new Date();
     const year = now.getFullYear();
 
-    let startMonth: number;
-    let endMonth: number;
-    let endYear = year;
+    let startDate: string;
+    let endDate: string;
 
-    switch (season) {
-      case '봄':
-        startMonth = 3;
-        endMonth = 5;
-        break;
-      case '여름':
-        startMonth = 6;
-        endMonth = 8;
-        break;
-      case '가을':
-        startMonth = 9;
-        endMonth = 11;
-        break;
-      case '겨울':
-        startMonth = 12;
-        endMonth = 2;
-        endYear = year + 1;
-        break;
-      default:
-        throw new Error('Invalid season');
+    if (season === '겨울') {
+      startDate = new Date(year - 1, 11, 1).toISOString();
+      endDate = new Date(year, 2, 1).toISOString();
+    } else {
+      const seasonMap: Record<string, [number, number]> = {
+        봄: [3, 5],
+        여름: [6, 8],
+        가을: [9, 11],
+      };
+      const months = seasonMap[season];
+      if (!months) throw new Error('Invalid season');
+      const [startMonth, endMonth] = months;
+      startDate = new Date(year, startMonth - 1, 1).toISOString();
+      endDate = new Date(year, endMonth, 1).toISOString();
     }
 
-    const startDate = new Date(year, startMonth - 1, 1).toISOString();
-    const endDate = new Date(endYear, endMonth, 1).toISOString();
-
-    const { data, error } = await this.supabase
+    let query = this.supabase
       .from('post')
       .select(
         `
@@ -184,9 +190,15 @@ class SbBoardRepository implements IBoardRepository {
       `,
       )
       .gte('date_created', startDate)
-      .lt('date_created', endDate)
-      .order('date_created', { ascending: false });
+      .lt('date_created', endDate);
 
+    // 온도 필터 적용
+    if (typeof min === 'number') query = query.gte('feels_like', min);
+    if (typeof max === 'number') query = query.lte('feels_like', max);
+
+    query = query.order('date_created', { ascending: false });
+
+    const { data, error } = await query;
     if (error) throw error;
 
     // 각 게시글에 댓글 수와 좋아요 수 추가
@@ -197,10 +209,17 @@ class SbBoardRepository implements IBoardRepository {
       comments: undefined,
       likes: undefined,
     }));
+
+    // 정렬 옵션에 따라 JavaScript에서 정렬
+    if (sort === 'popular') {
+      return postsWithCounts.sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
+    }
+
+    return postsWithCounts;
   }
 
-  // 현재 계절에 맞는 게시글 조회 (댓글 수, 좋아요 수 포함)
-  async getCurrentSeasonPosts(): Promise<Board[]> {
+  // 현재 계절에 맞는 게시글 조회 (정렬 옵션 포함)
+  async getCurrentSeasonPosts(sort?: string): Promise<Board[]> {
     const now = new Date();
     const month = now.getMonth() + 1;
 
@@ -216,70 +235,17 @@ class SbBoardRepository implements IBoardRepository {
       season = '겨울';
     }
 
-    // 기존 getBySeason 로직 사용 (이미 최신순 정렬됨)
-    const posts = await this.getBySeason(season);
+    // 기존 getBySeason 로직 사용 (정렬 옵션 전달)
+    const posts = await this.getBySeason(season, sort);
 
-    // 추가로 최신순 정렬 보장
-    return posts.sort(
-      (a, b) => new Date(b.date_created).getTime() - new Date(a.date_created).getTime(),
-    );
-  }
+    // 추가로 최신순 정렬 보장 (인기순이 아닌 경우에만)
+    if (sort !== 'popular') {
+      return posts.sort(
+        (a, b) => new Date(b.date_created).getTime() - new Date(a.date_created).getTime(),
+      );
+    }
 
-  // 랜덤 게시글 조회
-  async getRandomPosts(limit: number): Promise<Board[]> {
-    const { data, error } = await this.supabase
-      .from('post')
-      .select(
-        `
-        *, 
-        photos:photo(img_url), 
-        user:user_id(id, name, profile_img),
-        comments:comment(count),
-        likes:likes(count)
-      `,
-      )
-      .limit(limit)
-      .order('RANDOM()');
-
-    if (error) throw error;
-
-    // 각 게시글에 댓글 수와 좋아요 수 추가
-    return data.map((post) => ({
-      ...post,
-      comment_count: post.comments?.[0]?.count || 0,
-      like_count: post.likes?.[0]?.count || 0,
-      comments: undefined,
-      likes: undefined,
-    }));
-  }
-
-  // 가장 많이 좋아요 받은 게시글 조회
-  async getMostLikedPosts(limit: number): Promise<Board[]> {
-    const { data, error } = await this.supabase.from('post').select(
-      `
-        *, 
-        photos:photo(img_url), 
-        user:user_id(id, name, profile_img),
-        comments:comment(count),
-        likes:likes(count)
-      `,
-    );
-
-    if (error) throw error;
-
-    // 각 게시글에 댓글 수와 좋아요 수 추가
-    const postsWithCounts = data.map((post) => ({
-      ...post,
-      comment_count: post.comments?.[0]?.count || 0,
-      like_count: post.likes?.[0]?.count || 0,
-      comments: undefined,
-      likes: undefined,
-    }));
-
-    // 좋아요 수로 정렬하고 limit 적용
-    return postsWithCounts
-      .sort((a, b) => (b.like_count || 0) - (a.like_count || 0))
-      .slice(0, limit);
+    return posts;
   }
 }
 

@@ -7,11 +7,6 @@ import GetPostDetailUseCase from '@/(backend)/ootd/application/usecases/GetPostD
 /* 특정 게시글 조회 */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getUserFromJWT();
-    if (!user) {
-      return NextResponse.json({ message: '로그인이 필요합니다.' }, { status: 401 });
-    }
-
     const resolvedParams = await params;
     const id = resolvedParams.id;
 

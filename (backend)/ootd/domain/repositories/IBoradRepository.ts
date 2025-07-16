@@ -22,6 +22,7 @@ interface IBoardRepository {
   getCurrentSeasonPosts(sort?: string): Promise<Board[]>;
   getRandomPosts(limit: number): Promise<Board[]>;
   getMostLikedPosts(limit: number): Promise<Board[]>;
+  getMostLikedPostsByTemp(currentTemp: number, tempRange: number, limit: number): Promise<Board[]>;
 }
 
 export default IBoardRepository;

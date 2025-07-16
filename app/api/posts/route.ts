@@ -5,9 +5,9 @@ import SbBoardRepository from '@/(backend)/ootd/infrastructure/repositories/SbBo
 import GetRandomPostsUseCase from '@/(backend)/ootd/application/usecases/GetRandomPostsUseCase';
 import GetRandomPostsByTempUseCase from '@/(backend)/ootd/application/usecases/GetRandomPostsByTempUseCase';
 import GetMostLikedPostsUseCase from '@/(backend)/ootd/application/usecases/GetMostLikedPostsUseCase';
-import GetMostLikedByTempUseCase from '@/(backend)/ootd/application/usecases/GetMostLikedByTempUseCase';
+import GetMostLikedByTempUseCase from '@/(backend)/ootd/application/usecases/GetMostLikedPostsByTempUseCase';
 import CreateUseCase from '@/(backend)/ootd/application/usecases/CreateUseCase';
-import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostUseCase';
+import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostsUseCase';
 
 /* 게시글 조회 (다양한 정렬 및 필터링) */
 export async function GET(req: NextRequest) {

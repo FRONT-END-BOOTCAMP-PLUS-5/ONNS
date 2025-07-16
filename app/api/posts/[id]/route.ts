@@ -15,6 +15,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const resolvedParams = await params;
     const id = resolvedParams.id;
 
+    const user = await getUserFromJWT();
+    if (!user) {
+      return NextResponse.json({ message: '로그인이 필요합니다.' }, { status: 401 });
+    }
+
     const supabaseClient = supabase;
     const repository = new SbBoardRepository(supabaseClient);
     const getPostDetailUseCase = new GetPostDetailUseCase(repository);

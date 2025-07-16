@@ -1,29 +1,25 @@
 'use client';
 
 import MiniMore from '@/public/assets/icons/mini_more.svg';
-interface CommentProps {
-  profile_image: string;
-  nickname: string;
-  isMyComment: boolean;
+import type { CommentWithUser } from '@/(backend)/comments/application/dtos/CommentDto';
+import Image from 'next/image';
+interface CommentBoxExtraProps {
   isChild?: boolean;
-  createdAt: string;
-  content: string;
   onReply?: () => void;
   onDelete?: () => void;
-  replies?: CommentProps[];
 }
+type CommentBoxProps = CommentWithUser & CommentBoxExtraProps;
 
 const CommentBox = ({
-  profile_image,
-  nickname,
+  user,
   isMyComment,
+  date_created,
+  text,
+  replies,
   isChild = false,
-  createdAt,
-  content,
   onReply,
   // onDelete,
-  replies,
-}: CommentProps) => {
+}: CommentBoxProps) => {
   return (
     <div>
       {/* 구분선 */}
@@ -31,18 +27,24 @@ const CommentBox = ({
       {/* 댓글 본문 */}
       <div className="flex items-start gap-2 py-2">
         {/* 프로필 이미지 */}
-        <div className="w-7 h-7 rounded-full bg-blue-200 flex-shrink-0 overflow-hidden">
-          {profile_image}
+        <div className="relative w-7 h-7">
+          <Image
+            src={user.profile_img || ''}
+            alt="댓글자 이미지"
+            sizes="28px"
+            fill
+            className="rounded-full bg-blue-200 flex-shrink-0 overflow-hidden"
+          />
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2 justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-medium text-[14px] text-gray-800">{nickname}</span>
-              <span className="text-xs text-gray-400">{createdAt}</span>
+              <span className="font-medium text-[14px] text-gray-800">{user.name}</span>
+              <span className="text-xs text-gray-400">{date_created}</span>
             </div>
             {isMyComment && <MiniMore />}
           </div>
-          <div className="text-[14px] text-gray-800 mt-0.5">{content}</div>
+          <div className="text-[14px] text-gray-800 mt-0.5">{text}</div>
           <div className="flex items-center gap-2 mt-1">
             {!isChild && (
               <button className="text-xs text-gray-400 hover:underline" onClick={onReply}>

@@ -44,7 +44,7 @@ const NoticeItem: React.FC<NoticeItemProps> = ({ type, user, timestamp, isRead, 
 
   const handleClick = async () => {
     try {
-      await api.patch(`/notification/${id}/read`);
+      await api.patch(`/notifications/${id}/read`);
       router.push(`/ootd/${postId}`);
     } catch {
       alert('알림 읽음 처리에 실패했습니다. 다시 시도해 주세요.');

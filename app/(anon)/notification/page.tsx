@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import NoticeItem from './components/NoticeItem';
 import api from '@/utils/axiosInstance';
 import { formatDate } from '@/lib/formatDate';
-import { NotificationWithUser } from '@/(backend)/notification/application/dtos/NotificationDto';
+import { NotificationWithUser } from '@/(backend)/notifications/application/dtos/NotificationDto';
 
 export default function NotificationPage() {
   const [notifications, setNotifications] = useState<NotificationWithUser[]>([]);
@@ -15,7 +15,7 @@ export default function NotificationPage() {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/notification');
+        const response = await api.get('/notifications');
         setNotifications(response.data.notifications);
       } catch (err) {
         setError('알림을 불러오는데 실패했습니다.');

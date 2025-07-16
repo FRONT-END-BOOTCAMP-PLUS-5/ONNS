@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import Board from '@/(backend)/ootd/domain/entities/Board';
 import IBoardRepository from '@/(backend)/ootd/domain/repositories/IBoradRepository';
+import BoardMapper from '../mapper/BoardMapper';
 
 // Constants for better maintainability
 const SEASON_MONTHS = {
@@ -109,14 +110,14 @@ class SbBoardRepository implements IBoardRepository {
   }
 
   // Post detail by ID
-  async getById(id: string): Promise<Board | null> {
+  async getById(id: string, userId: number): Promise<Board | null> {
     try {
       const { data, error } = await this.buildPostQuery().eq('id', id).single();
 
       if (error) throw error;
       if (!data) return null;
 
-      return this.transformBoardData(data);
+      return BoardMapper.toDomain(this.transformBoardData(data), userId);
     } catch (error) {
       console.error('Error fetching post by ID:', error);
       throw error;

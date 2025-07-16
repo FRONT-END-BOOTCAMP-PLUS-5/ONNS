@@ -64,7 +64,7 @@ export default function OotdDetail() {
   const handleCommentDelete = async (commentId: number) => {
     try {
       await api.delete(`/comments/${commentId}`);
-      await fetchComments();
+      fetchComments();
     } catch (error) {
       console.error(error);
     }
@@ -104,8 +104,8 @@ export default function OotdDetail() {
           <CommentBox
             key={comment.id}
             {...comment}
-            onReply={() => handleReply(comment.id)}
-            onDelete={() => handleCommentDelete(comment.id)}
+            onReply={handleReply}
+            onDelete={handleCommentDelete}
           />
         ))}
       </div>

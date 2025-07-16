@@ -95,7 +95,13 @@ const CommentBox = ({
           {replies && replies.length > 0 && (
             <>
               {replies.map((reply, idx) => (
-                <CommentBox key={idx} {...reply} isChild={true} />
+                <CommentBox
+                  key={idx}
+                  {...reply}
+                  isChild={true}
+                  onReply={onReply}
+                  onDelete={onDelete}
+                />
               ))}
             </>
           )}

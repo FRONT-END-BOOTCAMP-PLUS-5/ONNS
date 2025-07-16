@@ -26,6 +26,8 @@ export default function OotdDetail() {
   const [isLoadingPost, setIsLoadingPost] = useState(true);
   const [isLoadingComments, setIsLoadingComments] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(0);
   // const [isLikeLoading, setIsLikedLoading] = useState(false);
 
   const fetchPost = async () => {
@@ -33,6 +35,8 @@ export default function OotdDetail() {
       setIsLoadingPost(true);
       const res = await api.get(`/posts/${id}`);
       setPost(res.data);
+      setLikeCount(res.data.like_count ?? 0);
+      setCommentCount(res.data.comment_count ?? 0);
     } catch (error) {
       console.error(error);
     } finally {
@@ -45,6 +49,7 @@ export default function OotdDetail() {
       setIsLoadingComments(true);
       const res = await api.get(`/posts/${id}/comments`);
       setComments(res.data.comments as CommentWithUser[]);
+      setCommentCount(res.data.comments.length);
     } finally {
       setIsLoadingComments(false);
     }
@@ -54,6 +59,7 @@ export default function OotdDetail() {
     try {
       const res = await api.get(`/posts/${id}/likes`);
       setIsLiked(res.data.isLiked);
+      setLikeCount(res.data.likeCount);
     } catch (error) {
       console.error(error);
     }
@@ -81,31 +87,43 @@ export default function OotdDetail() {
 
   const handleSend = async () => {
     if (!comment.trim()) return;
+    // Optimistic UI
+    setCommentCount((prev) => prev + 1);
     try {
       await api.post(`/posts/${id}/comments`, { text: comment, parent_id: parentId });
       setComment('');
       setParentId(null);
       await fetchComments();
     } catch (error) {
+      setCommentCount((prev) => prev - 1); // 롤백
       alert('댓글 등록에 실패했습니다.');
       console.error(error);
     }
   };
 
   const handleCommentDelete = async (commentId: number) => {
+    setCommentCount((prev) => prev - 1); // Optimistic UI
     try {
       await api.delete(`/comments/${commentId}`);
       await fetchComments();
     } catch (error) {
+      setCommentCount((prev) => prev + 1); // 롤백
       console.error(error);
     }
   };
 
   const handleLike = async () => {
+    // Optimistic UI
+    setIsLiked((prev) => !prev);
+    setLikeCount((prev) => prev + (isLiked ? -1 : 1));
     try {
       await api.post(`/posts/${id}/likes`);
-      await fetchLikeStatus();
+      // 서버 동기화
+      fetchLikeStatus();
     } catch (error) {
+      // 롤백
+      setIsLiked((prev) => !prev);
+      setLikeCount((prev) => prev + (isLiked ? 1 : -1));
       console.error(error);
     }
   };
@@ -147,20 +165,16 @@ export default function OotdDetail() {
             />
             {/* 좋아요, 댓글 수 영역 */}
             <div className="flex flex-row ml-[20px] mr-[20px] pt-[12px] pb-[12px] ">
-              <div onClick={handleLike}>
+              <div onClick={handleLike} className="cursor-pointer">
                 {isLiked ? (
                   <Heart className="w-[24px] h-[24px] mr-[3px]" />
                 ) : (
                   <StrokeHeart className="w-[24px] h-[24px] mr-[3px]" />
                 )}
               </div>
-              <span className="text-[14px] align-middle font-normal mr-[10px]">
-                {post.like_count ?? 0}
-              </span>
+              <span className="text-[14px] align-middle font-normal mr-[10px]">{likeCount}</span>
               <StrokeComment className="w-[24px] h-[24px] mb-[4px] mr-[3px]" />
-              <span className="text-[14px] align-middle font-normal">
-                {post.comment_count ?? 0}
-              </span>
+              <span className="text-[14px] align-middle font-normal">{commentCount}</span>
             </div>
             {/* 텍스트 영역 */}
             <div className="ml-[20px] mr-[20px] text-[14px] font-normal leading-[21px] whitespace-pre-line">

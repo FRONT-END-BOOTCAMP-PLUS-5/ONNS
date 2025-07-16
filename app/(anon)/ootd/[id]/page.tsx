@@ -18,14 +18,31 @@ export default function OotdDetail() {
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState<CommentWithUser[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [parentId, setParentId] = useState<number | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setComment(e.target.value);
   };
 
-  const handleReply = () => {
+  const handleReply = (commentId: number) => {
+    setParentId(commentId);
     if (inputRef.current) {
       inputRef.current.focus();
+    }
+  };
+
+  const handleSend = async () => {
+    if (!comment.trim()) return;
+    try {
+      await api.post(`/posts/${id}/comments`, { text: comment, parent_id: parentId });
+      setComment('');
+      setParentId(null);
+      // 댓글 새로고침
+      const res = await api.get(`/posts/${id}/comments`);
+      setComments(res.data.comments as CommentWithUser[]);
+    } catch (error) {
+      alert('댓글 등록에 실패했습니다.');
+      console.error(error);
     }
   };
 
@@ -35,7 +52,7 @@ export default function OotdDetail() {
       console.log(res.data);
     };
     fetchPost();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -68,10 +85,10 @@ export default function OotdDetail() {
       {/* 댓글 영역 */}
       <div className="ml-4 mr-4">
         {comments.map((comment) => (
-          <CommentBox key={comment.id} {...comment} onReply={handleReply} />
+          <CommentBox key={comment.id} {...comment} onReply={() => handleReply(comment.id)} />
         ))}
       </div>
-      <Input value={comment} onChange={handleChange} inputRef={inputRef} />
+      <Input value={comment} onChange={handleChange} inputRef={inputRef} onSend={handleSend} />
     </>
   );
 }

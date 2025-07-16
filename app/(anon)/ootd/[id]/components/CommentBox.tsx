@@ -5,12 +5,13 @@ import type { CommentWithUser } from '@/(backend)/comments/application/dtos/Comm
 import Image from 'next/image';
 interface CommentBoxExtraProps {
   isChild?: boolean;
-  onReply?: () => void;
+  onReply?: (id: number) => void;
   onDelete?: () => void;
 }
 type CommentBoxProps = CommentWithUser & CommentBoxExtraProps;
 
 const CommentBox = ({
+  id,
   user,
   isMyComment,
   date_created,
@@ -47,7 +48,10 @@ const CommentBox = ({
           <div className="text-[14px] text-gray-800 mt-0.5">{text}</div>
           <div className="flex items-center gap-2 mt-1">
             {!isChild && (
-              <button className="text-xs text-gray-400 hover:underline" onClick={onReply}>
+              <button
+                className="text-xs text-gray-400 hover:underline"
+                onClick={() => onReply?.(id)}
+              >
                 답글 달기
               </button>
             )}

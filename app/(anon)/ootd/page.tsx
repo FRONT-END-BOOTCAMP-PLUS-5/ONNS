@@ -2,6 +2,7 @@
 import OotdSeasonDropdown from './components/SeasonFlt/OotdSeasonDropdown';
 import TempFlt from './components/TempFlt/TempFlt';
 import SortPost from './components/SortPost/SortPost';
+import OotdPostList from './components/OotdPostList';
 
 const Ootd = () => {
   return (
@@ -13,6 +14,7 @@ const Ootd = () => {
       <div className="flex justify-end">
         <SortPost />
       </div>
+      <OotdPostList />
     </div>
   );
 };

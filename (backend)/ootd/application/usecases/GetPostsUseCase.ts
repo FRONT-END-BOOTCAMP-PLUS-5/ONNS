@@ -10,7 +10,7 @@ class GetPostUseCase {
   }
 
   // Get current season posts with optional sorting
-  async getAllPosts(myUserId: number, sort?: string): Promise<BoardWithUser[]> {
+  async getCurrentSeasonPosts(myUserId: number, sort?: string): Promise<BoardWithUser[]> {
     try {
       const boards = await this.boardRepository.getCurrentSeasonPosts(sort);
       return boards.map((board) => BoardMapper.toDomain(board, myUserId));

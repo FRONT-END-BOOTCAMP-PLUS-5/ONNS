@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
         case 'recent':
         default:
           const getRecentPostsUseCase = new GetPostUseCase(boardRepository);
-          posts = await getRecentPostsUseCase.getAllPosts(user.id, sort);
+          posts = await getRecentPostsUseCase.getCurrentSeasonPosts(user.id, sort);
           message = '최신 게시글을 성공적으로 조회했습니다.';
           posts = posts.slice(0, limit);
           break;

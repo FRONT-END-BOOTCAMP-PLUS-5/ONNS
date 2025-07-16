@@ -3,7 +3,7 @@
 import MiniMore from '@/public/assets/icons/mini_more.svg';
 import type { CommentWithUser } from '@/(backend)/comments/application/dtos/CommentDto';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DeletePostModalContainer from '@/app/components/DeletePostModalContainer';
 interface CommentBoxExtraProps {
   isChild?: boolean;
@@ -24,6 +24,20 @@ const CommentBox = ({
   onDelete,
 }: CommentBoxProps) => {
   const [showModal, setShowModal] = useState(false);
+  const [open, setOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  // 팝오버 외부 클릭 시 닫기
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [open]);
 
   return (
     <>
@@ -47,7 +61,24 @@ const CommentBox = ({
               <span className="font-medium text-[14px] text-gray-800">{user.name}</span>
               <span className="text-xs text-gray-400">{date_created}</span>
             </div>
-            {isMyComment && <MiniMore onClick={() => setShowModal(true)} />}
+            {isMyComment && (
+              <div className="relative" ref={popoverRef}>
+                <button onClick={() => setOpen((v) => !v)}>
+                  <MiniMore />
+                </button>
+                {open && (
+                  <button
+                    className="w-[58px] h-[30px] absolute top-5 right-0 border-[#F0EEEE] bg-[#F0EEEE] rounded-[10px] text-[12px] font-light"
+                    onClick={() => {
+                      setOpen(false);
+                      setShowModal(true);
+                    }}
+                  >
+                    삭제하기
+                  </button>
+                )}
+              </div>
+            )}
           </div>
           <div className="text-[14px] text-gray-800 mt-0.5">{text}</div>
           <div className="flex items-center gap-2 mt-1">
@@ -73,6 +104,7 @@ const CommentBox = ({
       {showModal && (
         <DeletePostModalContainer
           onDelete={() => {
+            console.log('댓글 삭제 시도', id);
             // 댓글 삭제 API 호출
             onDelete?.(id);
             setShowModal(false);

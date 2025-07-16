@@ -12,6 +12,7 @@ import { useParams, useRouter } from 'next/navigation';
 import api from '@/utils/axiosInstance';
 import type { CommentWithUser } from '@/(backend)/comments/application/dtos/CommentDto';
 import type { BoardWithUser } from '@/(backend)/ootd/application/dtos/BoardDto';
+import { formatDate } from '@/utils/date/formatDate';
 
 //ootd detail
 export default function OotdDetail() {
@@ -165,6 +166,9 @@ export default function OotdDetail() {
             <div className="ml-[20px] mr-[20px] text-[14px] font-normal leading-[21px] whitespace-pre-line">
               {post.text}
             </div>
+            <span className="text-xs text-gray-400 ml-[20px] mr-[20px]">
+              {formatDate(post.date_created)}
+            </span>
           </>
         )
       )}

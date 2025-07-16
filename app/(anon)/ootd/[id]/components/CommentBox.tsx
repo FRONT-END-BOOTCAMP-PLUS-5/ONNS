@@ -5,6 +5,7 @@ import type { CommentWithUser } from '@/(backend)/comments/application/dtos/Comm
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import DeletePostModalContainer from '@/app/components/DeletePostModalContainer';
+import { formatDate } from '@/utils/date/formatDate';
 interface CommentBoxExtraProps {
   isChild?: boolean;
   onReply?: (id: number) => void;
@@ -59,7 +60,7 @@ const CommentBox = ({
           <div className="flex items-center gap-2 justify-between">
             <div className="flex items-center gap-2">
               <span className="font-medium text-[14px] text-gray-800">{user.name}</span>
-              <span className="text-xs text-gray-400">{date_created}</span>
+              <span className="text-xs text-gray-400">{formatDate(date_created)}</span>
             </div>
             {isMyComment && (
               <div className="relative" ref={popoverRef}>

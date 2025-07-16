@@ -8,9 +8,12 @@ import StrokeHeart from '@/public/assets/icons/stroke_heart.svg';
 import StrokeComment from '@/public/assets/icons/stroke_comment.svg';
 import CommentBox from '@/app/(anon)/ootd/[id]/components/CommentBox';
 import Input from './components/Input';
+// import { useParams } from 'next/navigation';
+// import api from '@/utils/axiosInstance';
 
 //ootd detail
 export default function OotdDetail() {
+  // const { id } = useParams();
   // 프로필 이미지, 닉네임
   // 게시글 이미지, 텍스트, 좋아요 수, 댓글 수, 내 포스트인지 여부
   // 댓글 작성자 프로필 이미지, 닉네임, 댓글 내용, 내 댓글인지 여부
@@ -27,6 +30,12 @@ export default function OotdDetail() {
     }
   };
 
+  // useEffect(() => {
+  //   const fetchPost = async () => {
+  //     const res = await api.get(`/posts/${id}`);
+  //     console.log(res);
+  //   };
+  // }, []);
   return (
     <>
       <PostUserInfo profile_image={''} nickname={'주현주현주현주현주현주현주현'} isMyPost={true} />

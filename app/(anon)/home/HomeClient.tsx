@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useLoginModal } from '@/hooks/useLoginModal';
 import { Header, KakaoLoginModalContainer } from '@/app/components';
 import WeatherIndex from './components/WeatherIndex';
@@ -31,24 +31,24 @@ export default function HomeClient() {
     window.location.href = kakaoAuthUrl;
   };
 
-  const handleRandomPostsByTemp = async () => {
+  const handleRandomPostsByTemp = useCallback(async () => {
     if (feels_like) {
       const res = await api.get(`/posts?sort=random&temp=${feels_like}`);
       console.log(res.data);
     }
-  };
+  }, [feels_like]);
 
-  const handleMostLikedPostsByTemp = async () => {
+  const handleMostLikedPostsByTemp = useCallback(async () => {
     if (feels_like) {
       const res = await api.get(`/posts?sort=likes&temp=${feels_like}`);
       console.log(res.data);
     }
-  };
+  }, [feels_like]);
 
   useEffect(() => {
     handleRandomPostsByTemp();
     handleMostLikedPostsByTemp();
-  }, [feels_like]);
+  }, [handleRandomPostsByTemp, handleMostLikedPostsByTemp]);
 
   return (
     <>

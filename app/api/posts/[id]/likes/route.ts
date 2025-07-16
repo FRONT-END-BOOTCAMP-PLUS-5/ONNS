@@ -5,7 +5,7 @@ import { PostLikesUseCase } from '@/(backend)/likes/application/usecases/PostLik
 import { GetPostLikesUseCase } from '@/(backend)/likes/application/usecases/GetPostLikesUsecase';
 
 // 좋아요 상태 및 개수 조회
-export async function GET({ params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getUserFromJWT();
     if (!user) {

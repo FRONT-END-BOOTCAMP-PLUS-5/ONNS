@@ -3,10 +3,12 @@
 import MiniMore from '@/public/assets/icons/mini_more.svg';
 import type { CommentWithUser } from '@/(backend)/comments/application/dtos/CommentDto';
 import Image from 'next/image';
+import { useState } from 'react';
+import DeletePostModalContainer from '@/app/components/DeletePostModalContainer';
 interface CommentBoxExtraProps {
   isChild?: boolean;
   onReply?: (id: number) => void;
-  onDelete?: () => void;
+  onDelete?: (id: number) => void;
 }
 type CommentBoxProps = CommentWithUser & CommentBoxExtraProps;
 
@@ -19,10 +21,12 @@ const CommentBox = ({
   replies,
   isChild = false,
   onReply,
-  // onDelete,
+  onDelete,
 }: CommentBoxProps) => {
+  const [showModal, setShowModal] = useState(false);
+
   return (
-    <div>
+    <>
       {/* 구분선 */}
       {!isChild && <div className="border-b border-gray-200 mt-[14px]" />}
       {/* 댓글 본문 */}
@@ -43,7 +47,7 @@ const CommentBox = ({
               <span className="font-medium text-[14px] text-gray-800">{user.name}</span>
               <span className="text-xs text-gray-400">{date_created}</span>
             </div>
-            {isMyComment && <MiniMore />}
+            {isMyComment && <MiniMore onClick={() => setShowModal(true)} />}
           </div>
           <div className="text-[14px] text-gray-800 mt-0.5">{text}</div>
           <div className="flex items-center gap-2 mt-1">
@@ -66,7 +70,17 @@ const CommentBox = ({
           )}
         </div>
       </div>
-    </div>
+      {showModal && (
+        <DeletePostModalContainer
+          onDelete={() => {
+            // 댓글 삭제 API 호출
+            onDelete?.(id);
+            setShowModal(false);
+          }}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+    </>
   );
 };
 

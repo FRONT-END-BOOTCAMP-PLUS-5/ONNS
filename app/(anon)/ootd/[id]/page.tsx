@@ -20,6 +20,21 @@ export default function OotdDetail() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [parentId, setParentId] = useState<number | null>(null);
 
+  const fetchPost = async () => {
+    try {
+      const res = await api.get(`/posts/${id}`);
+      // setPost(res.data); // 게시글 상태가 필요하다면 이렇게 저장
+      console.log(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchComments = async () => {
+    const res = await api.get(`/posts/${id}/comments`);
+    setComments(res.data.comments as CommentWithUser[]);
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setComment(e.target.value);
   };
@@ -46,19 +61,20 @@ export default function OotdDetail() {
     }
   };
 
+  const handleCommentDelete = async (commentId: number) => {
+    try {
+      await api.delete(`/comments/${commentId}`);
+      await fetchComments();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    const fetchPost = async () => {
-      const res = await api.get(`/posts/${id}`);
-      console.log(res.data);
-    };
     fetchPost();
   }, [id]);
 
   useEffect(() => {
-    const fetchComments = async () => {
-      const res = await api.get(`/posts/${id}/comments`);
-      setComments(res.data.comments as CommentWithUser[]);
-    };
     fetchComments();
   }, [id]);
 
@@ -85,7 +101,12 @@ export default function OotdDetail() {
       {/* 댓글 영역 */}
       <div className="ml-4 mr-4">
         {comments.map((comment) => (
-          <CommentBox key={comment.id} {...comment} onReply={() => handleReply(comment.id)} />
+          <CommentBox
+            key={comment.id}
+            {...comment}
+            onReply={() => handleReply(comment.id)}
+            onDelete={() => handleCommentDelete(comment.id)}
+          />
         ))}
       </div>
       <Input value={comment} onChange={handleChange} inputRef={inputRef} onSend={handleSend} />

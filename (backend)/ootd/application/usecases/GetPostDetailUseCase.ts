@@ -9,9 +9,9 @@ class GetPostDetailUseCase {
   }
 
   // 게시글 상세 조회
-  async getPostById(id: string): Promise<Board | null> {
+  async getPostById(id: string, myUserId: number): Promise<Board | null> {
     try {
-      const post = await this.boardRepository.getById(id);
+      const post = await this.boardRepository.getById(id, myUserId);
       return post;
     } catch (error) {
       console.error('Error fetching post detail:', error);

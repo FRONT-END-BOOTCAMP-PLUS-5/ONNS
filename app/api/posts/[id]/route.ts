@@ -7,6 +7,11 @@ import GetPostDetailUseCase from '@/(backend)/ootd/application/usecases/GetPostD
 /* 특정 게시글 조회 */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const user = await getUserFromJWT();
+    if (!user) {
+      return NextResponse.json({ message: '로그인이 필요합니다.' }, { status: 401 });
+    }
+
     const resolvedParams = await params;
     const id = resolvedParams.id;
 
@@ -14,7 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const repository = new SbBoardRepository(supabaseClient);
     const getPostDetailUseCase = new GetPostDetailUseCase(repository);
 
-    const post = await getPostDetailUseCase.getPostById(id);
+    const post = await getPostDetailUseCase.getPostById(id, user.id);
 
     if (!post) {
       return NextResponse.json({ message: '게시글을 찾을 수 없습니다.' }, { status: 404 });

@@ -8,7 +8,7 @@ import StrokeHeart from '@/public/assets/icons/stroke_heart.svg';
 import StrokeComment from '@/public/assets/icons/stroke_comment.svg';
 import CommentBox from '@/app/(anon)/ootd/[id]/components/CommentBox';
 import Input from './components/Input';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import api from '@/utils/axiosInstance';
 import type { CommentWithUser } from '@/(backend)/comments/application/dtos/CommentDto';
 import type { BoardWithUser } from '@/(backend)/ootd/application/dtos/BoardDto';
@@ -21,7 +21,7 @@ export default function OotdDetail() {
   const [comments, setComments] = useState<CommentWithUser[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const [parentId, setParentId] = useState<number | null>(null);
-  // const router = useRouter();
+  const router = useRouter();
   const [isLoadingPost, setIsLoadingPost] = useState(true);
   const [isLoadingComments, setIsLoadingComments] = useState(true);
 
@@ -48,15 +48,15 @@ export default function OotdDetail() {
     }
   };
 
-  // const handlePostDelete = async () => {
-  //   try {
-  //     await api.delete(`/posts/${id}`);
-  //     //이전 화면으로 이동
-  //     router.back();
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
+  const handlePostDelete = async () => {
+    try {
+      await api.delete(`/posts/${id}`);
+      //이전 화면으로 이동
+      router.back();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setComment(e.target.value);
@@ -109,9 +109,11 @@ export default function OotdDetail() {
         post && (
           <>
             <PostUserInfo
+              id={post.id}
               profile_image={post.user?.profile_img || ''}
               nickname={post.user?.name || ''}
               isMyPost={post.isMyPost}
+              handlePostDelete={handlePostDelete}
             />
             <Image
               src={post.photos && post.photos.length > 0 ? post.photos[0].img_url : ''}

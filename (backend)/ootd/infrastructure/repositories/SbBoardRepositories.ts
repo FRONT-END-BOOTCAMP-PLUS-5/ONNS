@@ -1,12 +1,13 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import Board from '@/(backend)/ootd/domain/entities/Board';
 import IBoardRepository from '@/(backend)/ootd/domain/repositories/IBoradRepository';
+import BoardMapper from '../mapper/BoardMapper';
 
 class SbBoardRepository implements IBoardRepository {
   constructor(private readonly supabase: SupabaseClient) {}
 
   // 게시글 상세 조회
-  async getById(id: string): Promise<Board | null> {
+  async getById(id: string, myUserId: number): Promise<Board | null> {
     const { data, error } = await this.supabase
       .from('post')
       .select(
@@ -34,7 +35,7 @@ class SbBoardRepository implements IBoardRepository {
     delete postWithCounts.comments;
     delete postWithCounts.likes;
 
-    return postWithCounts;
+    return BoardMapper.toDomain(postWithCounts, myUserId);
   }
 
   // 게시글 생성

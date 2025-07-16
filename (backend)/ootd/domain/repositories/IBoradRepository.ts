@@ -1,7 +1,7 @@
 import Board from '../entities/Board';
 
 interface IBoardRepository {
-  getById(id: string): Promise<Board | null>;
+  getById(id: string, userId: number): Promise<Board | null>;
   create(
     board: Omit<
       Board,

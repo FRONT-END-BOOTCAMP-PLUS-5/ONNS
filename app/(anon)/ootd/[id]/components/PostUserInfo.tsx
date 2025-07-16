@@ -4,11 +4,19 @@ import More from '@/public/assets/icons/more.svg';
 import { useEffect, useRef, useState } from 'react';
 import { DeletePostModalContainer } from '@/app/components';
 interface PostUserInfoProps {
+  id: number;
   profile_image: string | null;
   nickname: string | null;
   isMyPost: boolean | null;
+  handlePostDelete?: (id: number) => void;
 }
-const PostUserInfo = ({ profile_image, nickname, isMyPost }: PostUserInfoProps) => {
+const PostUserInfo = ({
+  id,
+  profile_image,
+  nickname,
+  isMyPost,
+  handlePostDelete,
+}: PostUserInfoProps) => {
   const [open, setOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -63,6 +71,7 @@ const PostUserInfo = ({ profile_image, nickname, isMyPost }: PostUserInfoProps) 
         <DeletePostModalContainer
           onDelete={() => {
             // 게시글 삭제 API 호출
+            handlePostDelete?.(id);
             setShowModal(false);
           }}
           onClose={() => setShowModal(false)}

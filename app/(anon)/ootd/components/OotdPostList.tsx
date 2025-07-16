@@ -5,8 +5,10 @@ import { BoardWithUser } from '@/(backend)/ootd/application/dtos/BoardDto';
 import Image from 'next/image';
 import Comment from '@/public/assets/icons/chat.svg';
 import Like from '@/public/assets/icons/heart.svg';
+import { useRouter } from 'next/navigation';
 
 const OotdPostList = () => {
+  const router = useRouter();
   const [posts, setPosts] = useState<BoardWithUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,7 +31,11 @@ const OotdPostList = () => {
   return (
     <div className="w-[390px] grid grid-cols-2 gap-y-[16px] mx-[20px] pb-[30px]">
       {posts.slice(0, 6).map((post) => (
-        <div key={post.id} className="w-[190px] h-[258px] flex flex-col items-start gap-y-[10px]">
+        <div
+          key={post.id}
+          className="w-[190px] h-[258px] flex flex-col items-start gap-y-[10px] cursor-pointer"
+          onClick={() => router.push(`/ootd/${post.id}`)}
+        >
           <div className="w-[190px] h-[190px] relative overflow-hidden">
             {post.photos && post.photos.length > 0 && (
               <Image

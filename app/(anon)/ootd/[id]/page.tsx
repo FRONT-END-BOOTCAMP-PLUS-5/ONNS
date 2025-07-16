@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import PostUserInfo from '@/app/(anon)/ootd/[id]/components/PostUserInfo';
-import Image from 'next/image';
+// import Image from 'next/image';
 import Heart from '@/public/assets/icons/heart.svg';
 import StrokeHeart from '@/public/assets/icons/stroke_heart.svg';
 import StrokeComment from '@/public/assets/icons/stroke_comment.svg';
@@ -28,7 +28,6 @@ export default function OotdDetail() {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
-  // const [isLikeLoading, setIsLikedLoading] = useState(false);
 
   const fetchPost = async () => {
     try {
@@ -95,33 +94,30 @@ export default function OotdDetail() {
       setParentId(null);
       await fetchComments();
     } catch (error) {
-      setCommentCount((prev) => prev - 1); // 롤백
+      setCommentCount((prev) => prev - 1);
       alert('댓글 등록에 실패했습니다.');
       console.error(error);
     }
   };
 
   const handleCommentDelete = async (commentId: number) => {
-    setCommentCount((prev) => prev - 1); // Optimistic UI
+    setCommentCount((prev) => prev - 1);
     try {
       await api.delete(`/comments/${commentId}`);
       await fetchComments();
     } catch (error) {
-      setCommentCount((prev) => prev + 1); // 롤백
+      setCommentCount((prev) => prev + 1);
       console.error(error);
     }
   };
 
   const handleLike = async () => {
-    // Optimistic UI
     setIsLiked((prev) => !prev);
     setLikeCount((prev) => prev + (isLiked ? -1 : 1));
     try {
       await api.post(`/posts/${id}/likes`);
-      // 서버 동기화
       fetchLikeStatus();
     } catch (error) {
-      // 롤백
       setIsLiked((prev) => !prev);
       setLikeCount((prev) => prev + (isLiked ? 1 : -1));
       console.error(error);
@@ -156,13 +152,14 @@ export default function OotdDetail() {
               isMyPost={post.isMyPost}
               handlePostDelete={handlePostDelete}
             />
-            <Image
+            {/* <Image
               src={post.photos && post.photos.length > 0 ? post.photos[0].img_url : ''}
               alt="게시글 이미지"
               className="w-full h-[429px] bg-neutral-200"
               width={600}
               height={429}
-            />
+            /> */}
+            <div className="w-full h-[429px] bg-neutral-200" />
             {/* 좋아요, 댓글 수 영역 */}
             <div className="flex flex-row ml-[20px] mr-[20px] pt-[12px] pb-[12px] ">
               <div onClick={handleLike} className="cursor-pointer">

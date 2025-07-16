@@ -5,10 +5,14 @@ import SortPost from './components/SortPost/SortPost';
 
 const Ootd = () => {
   return (
-    <div className="flex">
-      <OotdSeasonDropdown />
-      <TempFlt />
-      <SortPost />
+    <div>
+      <div className="flex">
+        <OotdSeasonDropdown />
+        <TempFlt />
+      </div>
+      <div className="flex justify-end">
+        <SortPost />
+      </div>
     </div>
   );
 };

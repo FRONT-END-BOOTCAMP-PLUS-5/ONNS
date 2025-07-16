@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import axiosInstance from '@/utils/axiosInstance';
 import { BoardWithUser } from '@/(backend)/ootd/application/dtos/BoardDto';
 import Image from 'next/image';
-import ChatIcon from '@/public/icons/ChatIcon.svg';
-import LikeIcon from '@/public/icons/LikeIcon.svg';
+import ChatIcon from '@/public/icons/chat.svg';
+import LikeIcon from '@/public/icons/heart.svg';
 
 const OotdPostList = () => {
   const [posts, setPosts] = useState<BoardWithUser[]>([]);

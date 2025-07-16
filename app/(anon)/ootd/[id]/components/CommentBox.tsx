@@ -110,8 +110,6 @@ const CommentBox = ({
       {showModal && (
         <DeletePostModalContainer
           onDelete={() => {
-            console.log('댓글 삭제 시도', id);
-            // 댓글 삭제 API 호출
             onDelete?.(id);
             setShowModal(false);
           }}

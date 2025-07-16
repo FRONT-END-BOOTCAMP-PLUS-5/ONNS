@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PostUserInfo from '@/app/(anon)/ootd/[id]/components/PostUserInfo';
 import Image from 'next/image';
-// import Heart from '@/public/assets/icons/heart.svg';
+import Heart from '@/public/assets/icons/heart.svg';
 import StrokeHeart from '@/public/assets/icons/stroke_heart.svg';
 import StrokeComment from '@/public/assets/icons/stroke_comment.svg';
 import CommentBox from '@/app/(anon)/ootd/[id]/components/CommentBox';
@@ -24,13 +24,14 @@ export default function OotdDetail() {
   const router = useRouter();
   const [isLoadingPost, setIsLoadingPost] = useState(true);
   const [isLoadingComments, setIsLoadingComments] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  // const [isLikeLoading, setIsLikedLoading] = useState(false);
 
   const fetchPost = async () => {
     try {
       setIsLoadingPost(true);
       const res = await api.get(`/posts/${id}`);
       setPost(res.data);
-      console.log(res.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -48,10 +49,18 @@ export default function OotdDetail() {
     }
   };
 
+  const fetchLikeStatus = async () => {
+    try {
+      const res = await api.get(`/posts/${id}/likes`);
+      setIsLiked(res.data.isLiked);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handlePostDelete = async () => {
     try {
       await api.delete(`/posts/${id}`);
-      //이전 화면으로 이동
       router.back();
     } catch (error) {
       console.error(error);
@@ -91,12 +100,25 @@ export default function OotdDetail() {
     }
   };
 
+  const handleLike = async () => {
+    try {
+      await api.post(`/posts/${id}/likes`);
+      await fetchLikeStatus();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchPost();
   }, [id]);
 
   useEffect(() => {
     fetchComments();
+  }, [id]);
+
+  useEffect(() => {
+    fetchLikeStatus();
   }, [id]);
 
   return (
@@ -124,7 +146,13 @@ export default function OotdDetail() {
             />
             {/* 좋아요, 댓글 수 영역 */}
             <div className="flex flex-row ml-[20px] mr-[20px] pt-[12px] pb-[12px] ">
-              <StrokeHeart className="w-[24px] h-[24px] mr-[3px]" />
+              <div onClick={handleLike}>
+                {isLiked ? (
+                  <Heart className="w-[24px] h-[24px] mr-[3px]" />
+                ) : (
+                  <StrokeHeart className="w-[24px] h-[24px] mr-[3px]" />
+                )}
+              </div>
               <span className="text-[14px] align-middle font-normal mr-[10px]">
                 {post.like_count ?? 0}
               </span>

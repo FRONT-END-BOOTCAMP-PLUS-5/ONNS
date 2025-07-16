@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import axiosInstance from '@/utils/axiosInstance';
 import { BoardWithUser } from '@/(backend)/ootd/application/dtos/BoardDto';
 import Image from 'next/image';
-import ChatIcon from '@/public/icons/chat.svg';
-import LikeIcon from '@/public/icons/heart.svg';
+import Comment from '@/public/assets/icons/chat.svg';
+import Like from '@/public/assets/icons/heart.svg';
 
 const OotdPostList = () => {
   const [posts, setPosts] = useState<BoardWithUser[]>([]);
@@ -27,7 +27,7 @@ const OotdPostList = () => {
   if (!posts.length) return <div>게시글이 없습니다.</div>;
 
   return (
-    <div className="w-[390px] h-[258px] grid grid-cols-2 gap-y-[16px] mx-[20px]">
+    <div className="w-[390px] grid grid-cols-2 gap-y-[16px] mx-[20px] pb-[30px]">
       {posts.slice(0, 6).map((post) => (
         <div key={post.id} className="w-[190px] h-[258px] flex flex-col items-start gap-y-[10px]">
           <div className="w-[190px] h-[190px] relative overflow-hidden">
@@ -64,14 +64,14 @@ const OotdPostList = () => {
                   <div className="w-[64px] h-[17px] flex justify-start items-center gap-2">
                     {/* 댓글 수 */}
                     <div className="w-[29px] h-[17px] flex items-center gap-[4px]">
-                      <ChatIcon />
+                      <Comment className="w-[16px] h-[16px]" />
                       <div className="w-[9px] h-[13px] flex items-center text-black text-sm font-medium leading-none">
                         {post.comment_count ?? 0}
                       </div>
                     </div>
                     {/* 좋아요 수 */}
                     <div className="flex items-center gap-1 h-[13px]">
-                      <LikeIcon />
+                      <Like className="w-[16px] h-[16px]" />
                       <div className="w-[9px] h-[13px] flex items-center text-black text-sm font-medium leading-none">
                         {post.like_count ?? 0}
                       </div>

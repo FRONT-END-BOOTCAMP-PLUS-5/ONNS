@@ -9,7 +9,7 @@ const SortPost = () => {
   const { isOpen, setIsOpen, selected, setSelected, ref } = useDropdown(SORT_OPTIONS[0]);
 
   return (
-    <div ref={ref} className=" relative inline-block ml-auto mr-[20px] mt-[36px]">
+    <div ref={ref} className=" relative inline-block mr-[20px]">
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}

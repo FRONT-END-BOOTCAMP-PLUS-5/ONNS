@@ -30,16 +30,15 @@ const TempFlt = () => {
               {TEMP_RANGES.map((range) => (
                 <div
                   key={range}
-                  className="w-[65px] h-[22px] flex items-center justify-center mx-auto group cursor-pointer hover:bg-[#6A71E5] hover:text-white transition-colors"
+                  className="w-[81px] h-[30px] flex items-center justify-start cursor-pointer hover:bg-[#6A71E5] transition-colors group"
                   onClick={() => {
                     setSelected(range);
                     setIsOpen(false);
                   }}
-                  style={{ cursor: 'pointer' }}
                 >
-                  <div className="w-[66px] h-[14px] box-border text-[#6A71E5] flex items-center justify-start pl-1 group-hover:text-white text-xs font-semibold">
+                  <span className="w-[43px] h-[14px] text-[#6A71E5] group-hover:text-white text-xs font-semibold pl-[8px]">
                     {range}
-                  </div>
+                  </span>
                 </div>
               ))}
             </div>

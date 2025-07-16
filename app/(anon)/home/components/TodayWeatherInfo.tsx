@@ -25,7 +25,7 @@ const TodayWeatherInfo = ({ cityname, feels_like }: TodayWeatherInfoProps) => {
       `}
         >
           <div>
-            <div className="text-[16px] font-semibold mb-[6px]">오늘의 날씨</div>
+            <div className="text-[16px] text-black font-semibold mb-[6px]">오늘의 날씨</div>
             <div className="flex items-center">
               <Location />
               <span className="text-lg text-[12px] font-light text-gray-700">{cityname}</span>

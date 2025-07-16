@@ -3,9 +3,11 @@ import { supabase } from '@/utils/supabase/supabaseClient';
 import { getUserFromJWT } from '@/utils/auth/tokenAuth';
 import SbBoardRepository from '@/(backend)/ootd/infrastructure/repositories/SbBoardRepositories';
 import GetRandomPostsUseCase from '@/(backend)/ootd/application/usecases/GetRandomPostsUseCase';
+import GetRandomPostsByTempUseCase from '@/(backend)/ootd/application/usecases/GetRandomPostsByTempUseCase';
 import GetMostLikedPostsUseCase from '@/(backend)/ootd/application/usecases/GetMostLikedPostsUseCase';
+import GetMostLikedByTempUseCase from '@/(backend)/ootd/application/usecases/GetMostLikedPostsByTempUseCase';
 import CreateUseCase from '@/(backend)/ootd/application/usecases/CreateUseCase';
-import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostUseCase';
+import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostsUseCase';
 
 /* 게시글 조회 (다양한 정렬 및 필터링) */
 export async function GET(req: NextRequest) {
@@ -18,10 +20,11 @@ export async function GET(req: NextRequest) {
 
     // Query parameters
     const { searchParams } = new URL(req.url);
-    const sort = searchParams.get('sort') || 'recent'; // recent, random, likes
+    const sort = searchParams.get('sort') || 'recent'; // recent, random, likes, temp
     const limit = parseInt(searchParams.get('limit') || '10');
     const order = searchParams.get('order') || 'desc';
     const season = searchParams.get('season') || null; // spring, summer, autumn, winter
+    const currentTemp = parseInt(searchParams.get('temp') || '0'); // current temperature for temp-based filtering
 
     // 의존성 주입
     const boardRepository = new SbBoardRepository(supabase);
@@ -29,37 +32,52 @@ export async function GET(req: NextRequest) {
     let posts;
     let message;
 
-    switch (sort) {
-      case 'random':
-        const getRandomPostsUseCase = new GetRandomPostsUseCase(boardRepository);
-        posts = await getRandomPostsUseCase.execute(user.id, limit);
-        message = '랜덤 게시글을 성공적으로 조회했습니다.';
-        break;
+    // Handle season filtering first (if specified)
+    if (season) {
+      posts = await boardRepository.getBySeason(season, sort);
+      message = `${season} 계절 게시글을 성공적으로 조회했습니다.`;
+      posts = posts.slice(0, limit);
+    } else {
+      // Handle sorting without season filter
+      switch (sort) {
+        case 'random':
+          // Check if temperature is provided for temperature-based random posts
+          if (currentTemp && !isNaN(currentTemp)) {
+            const getRandomPostsByTempUseCase = new GetRandomPostsByTempUseCase(boardRepository);
+            posts = await getRandomPostsByTempUseCase.execute({
+              myUserId: user.id,
+              currentTemp,
+              tempRange: 5,
+              limit,
+            });
+            message = `현재 온도(${currentTemp}°C) 기준 ±5도 범위 내 랜덤 게시글을 성공적으로 조회했습니다.`;
+          } else {
+            const getRandomPostsUseCase = new GetRandomPostsUseCase(boardRepository);
+            posts = await getRandomPostsUseCase.execute(user.id, limit);
+            message = '랜덤 게시글을 성공적으로 조회했습니다.';
+          }
+          break;
 
-      case 'likes':
-        const getMostLikedPostsUseCase = new GetMostLikedPostsUseCase(boardRepository);
-        posts = await getMostLikedPostsUseCase.execute(user.id, limit);
-        message = '인기 게시글을 성공적으로 조회했습니다.';
-        break;
+        case 'likes':
+          if (!currentTemp || isNaN(currentTemp)) {
+            const getMostLikedPostsUseCase = new GetMostLikedPostsUseCase(boardRepository);
+            posts = await getMostLikedPostsUseCase.execute(user.id, limit);
+            message = '인기 게시글을 성공적으로 조회했습니다.';
+          } else {
+            const getMostLikedByTempUseCase = new GetMostLikedByTempUseCase(boardRepository);
+            posts = await getMostLikedByTempUseCase.execute(user.id, currentTemp, limit);
+            message = `현재 온도(${currentTemp}°C) 기준 ±5도 범위 내 인기 게시글을 성공적으로 조회했습니다.`;
+          }
+          break;
 
-      case 'recent':
-        const getRecentPostsUseCase = new GetPostUseCase(boardRepository);
-        posts = await getRecentPostsUseCase.getAllPosts(user.id, sort, season || undefined);
-        message = '최신 게시글을 성공적으로 조회했습니다.';
-        break;
-      default:
-        if (season) {
-          // Get posts by specific season
-          posts = await boardRepository.getBySeason(season);
-          message = `${season} 계절 게시글을 성공적으로 조회했습니다.`;
-        } else {
-          // Get current season posts
-          posts = await boardRepository.getCurrentSeasonPosts();
+        case 'recent':
+        default:
+          const getRecentPostsUseCase = new GetPostUseCase(boardRepository);
+          posts = await getRecentPostsUseCase.getAllPosts(user.id, sort);
           message = '최신 게시글을 성공적으로 조회했습니다.';
-        }
-        // Apply limit in JavaScript since the methods don't support it
-        posts = posts.slice(0, limit);
-        break;
+          posts = posts.slice(0, limit);
+          break;
+      }
     }
 
     return NextResponse.json({
@@ -71,6 +89,7 @@ export async function GET(req: NextRequest) {
         limit,
         order,
         season: season || 'current',
+        temp: currentTemp || null,
         total: posts.length,
       },
     });

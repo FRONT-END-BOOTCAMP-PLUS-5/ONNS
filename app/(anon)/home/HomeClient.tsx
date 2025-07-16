@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLoginModal } from '@/hooks/useLoginModal';
 import { Header, KakaoLoginModalContainer } from '@/app/components';
 import WeatherIndex from './components/WeatherIndex';
@@ -18,11 +18,6 @@ export default function HomeClient() {
   const [hasUnreadNotification, setHasUnreadNotification] = useState<boolean | undefined>(
     undefined,
   );
-
-  const handleLogin = () => {
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY}&redirect_uri=${process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI}&response_type=code`;
-    window.location.href = kakaoAuthUrl;
-  };
 
   const { lat, lon } = useLocation();
   useWeather(lat, lon);
@@ -62,6 +57,30 @@ export default function HomeClient() {
     'hasUnreadNotification:',
     hasUnreadNotification,
   );
+
+  const handleLogin = () => {
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY}&redirect_uri=${process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI}&response_type=code`;
+    window.location.href = kakaoAuthUrl;
+  };
+
+  const handleRandomPostsByTemp = useCallback(async () => {
+    if (feels_like) {
+      const res = await api.get(`/posts?sort=random&temp=${feels_like}`);
+      console.log(res.data);
+    }
+  }, [feels_like]);
+
+  const handleMostLikedPostsByTemp = useCallback(async () => {
+    if (feels_like) {
+      const res = await api.get(`/posts?sort=likes&temp=${feels_like}`);
+      console.log(res.data);
+    }
+  }, [feels_like]);
+
+  useEffect(() => {
+    handleRandomPostsByTemp();
+    handleMostLikedPostsByTemp();
+  }, [handleRandomPostsByTemp, handleMostLikedPostsByTemp]);
 
   return (
     <>

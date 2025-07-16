@@ -1,7 +1,7 @@
 import Board from '../entities/Board';
 
 interface IBoardRepository {
-  getById(id: string): Promise<Board | null>;
+  getById(id: string, myUserId: number): Promise<Board | null>;
   create(
     board: Omit<
       Board,
@@ -22,6 +22,7 @@ interface IBoardRepository {
   getCurrentSeasonPosts(sort?: string): Promise<Board[]>;
   getRandomPosts(limit: number): Promise<Board[]>;
   getMostLikedPosts(limit: number): Promise<Board[]>;
+  getMostLikedPostsByTemp(currentTemp: number, tempRange: number, limit: number): Promise<Board[]>;
 }
 
 export default IBoardRepository;

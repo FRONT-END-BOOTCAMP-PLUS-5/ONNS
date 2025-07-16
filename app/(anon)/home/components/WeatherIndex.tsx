@@ -16,15 +16,15 @@ const WeatherIndex = ({ umbrellaIndex, dustIndex }: WeatherIndexProps) => {
 
   return (
     <>
-      <div className="w-full h-9 bg-neutral-200/50 flex items-center overflow-hidden">
+      <div className="w-full h-9 bg-neutral-200/50 flex items-center overflow-hidden mb-[22px]">
         <div
           className="flex whitespace-nowrap text-sm px-2"
           style={{
             animation: 'marquee 18s linear infinite',
           }}
         >
-          <span className="mx-6">{text}</span>
-          <span className="mx-6">{text}</span>
+          <span className="text-black mx-6">{text}</span>
+          <span className="text-black mx-6">{text}</span>
         </div>
         <style>{`
         @keyframes marquee {

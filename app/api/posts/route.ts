@@ -22,14 +22,24 @@ export async function GET(req: NextRequest) {
     const order = searchParams.get('order') || 'desc';
     const season = searchParams.get('season') || null;
     const currentTemp = parseInt(searchParams.get('temp') || '0');
+    // min, max 파라미터 추가
+    const min = searchParams.get('min');
+    const max = searchParams.get('max');
 
     const boardRepository = new SbBoardRepository(supabase);
     let posts;
     let message;
 
-    // 계절별 필터
+    // 계절별 필터 (+ 온도 필터)
     if (season) {
-      posts = await boardRepository.getBySeason(season, sort, undefined, undefined, offset, limit);
+      posts = await boardRepository.getBySeason(
+        season,
+        sort,
+        min ? Number(min) : undefined,
+        max ? Number(max) : undefined,
+        offset,
+        limit,
+      );
       message = `${season} 계절 게시글 조회 성공`;
     } else {
       // 기타 정렬/필터
@@ -63,6 +73,8 @@ export async function GET(req: NextRequest) {
         limit,
         order,
         season: season || 'current',
+        min: min || null,
+        max: max || null,
         temp: currentTemp || null,
         total: posts.length,
       },

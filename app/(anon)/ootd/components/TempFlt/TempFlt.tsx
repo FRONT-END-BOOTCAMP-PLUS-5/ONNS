@@ -1,12 +1,23 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Arrow from '@/public/assets/icons/arrow.svg';
 import useDropdown from '@/hooks/useDropdown';
-
-const TEMP_RANGES = ['전체', '0~9°C', '10~19°C', '20~29°C', '30°C~'];
+import { useSeasonStore } from '@/stores/seasonStore';
+import getTempOptionsBySeason from '@/utils/ootd/getTempOptionsBySeason';
+import { useTempFilterStore } from '@/stores/tempFilterStore';
 
 const TempFlt = () => {
+  const selectedSeason = useSeasonStore((state) => state.selectedSeason);
+  const TEMP_RANGES = getTempOptionsBySeason(selectedSeason);
   const { isOpen, setIsOpen, selected, setSelected, ref } = useDropdown(TEMP_RANGES[0]);
+  const setSelectedTemp = useTempFilterStore((state) => state.setSelectedTemp);
+
+  useEffect(() => {
+    if (!TEMP_RANGES.includes(selected)) {
+      setSelected(TEMP_RANGES[0]);
+    }
+    setSelectedTemp(selected);
+  }, [selected, TEMP_RANGES, setSelectedTemp, setSelected]);
 
   return (
     <div>
@@ -25,8 +36,8 @@ const TempFlt = () => {
           </div>
         </button>
         {isOpen && (
-          <div className="w-[81px] h-[116px] bg-white rounded-2xl outline outline-[1.20px] outline-offset-[-1.20px] outline-[#6A71E5] flex flex-col z-10 absolute left-[8px] mt-[4px]">
-            <div className="w-[81px] h-[116px] flex flex-col rounded-2xl overflow-hidden">
+          <div className="w-[81px] bg-white rounded-2xl outline outline-[1.20px] outline-offset-[-1.20px] outline-[#6A71E5] flex flex-col z-10 absolute left-[8px] mt-[4px]">
+            <div className="flex flex-col rounded-2xl overflow-hidden">
               {TEMP_RANGES.map((range) => (
                 <div
                   key={range}

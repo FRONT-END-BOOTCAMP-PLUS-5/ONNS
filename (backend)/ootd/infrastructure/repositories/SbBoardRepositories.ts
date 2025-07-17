@@ -249,18 +249,24 @@ class SbBoardRepository implements IBoardRepository {
         query = query.limit(limit);
       }
 
-      query = query.order('date_created', { ascending: false });
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      const postsWithCounts = this.transformBoardDataArray(data || []);
-
-      // 인기순 정렬
+      // 인기순 정렬: 최신순 정렬(order by date_created)을 적용하지 않음
       if (sort === 'popular') {
-        return postsWithCounts.sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
+        const { data, error } = await query;
+        if (error) throw error;
+        const postsWithCounts = this.transformBoardDataArray(data || []);
+        // 좋아요 내림차순, 같으면 최신순
+        return postsWithCounts.slice().sort((a, b) => {
+          const likeDiff = (b.like_count || 0) - (a.like_count || 0);
+          if (likeDiff !== 0) return likeDiff;
+          return new Date(b.date_created).getTime() - new Date(a.date_created).getTime();
+        });
       }
 
+      // 최신순 정렬
+      query = query.order('date_created', { ascending: false });
+      const { data, error } = await query;
+      if (error) throw error;
+      const postsWithCounts = this.transformBoardDataArray(data || []);
       return postsWithCounts;
     } catch (error) {
       console.error('계절별 게시글 조회 오류:', error);

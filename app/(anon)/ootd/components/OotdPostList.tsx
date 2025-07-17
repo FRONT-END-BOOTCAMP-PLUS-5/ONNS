@@ -10,6 +10,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useSeasonStore } from '@/stores/seasonStore';
 import { usePathname } from 'next/navigation';
 import { useTempFilterStore } from '@/stores/tempFilterStore';
+import { useSortStore } from '@/stores/sortStore';
 
 function getCurrentSeason() {
   const month = new Date().getMonth() + 1;
@@ -30,6 +31,7 @@ const OotdPostList = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const selectedTemp = useTempFilterStore((state) => state.selectedTemp);
+  const sort = useSortStore((state) => state.sort);
 
   // 온도 구간 파싱 함수 (TempFlt와 동일하게 유지)
   function parseTempRange(tempRange: string) {
@@ -53,6 +55,7 @@ const OotdPostList = () => {
     async (pageNum: number, season?: string) => {
       const params: Record<string, string | number | undefined> = { page: pageNum, limit: LIMIT };
       if (season) params.season = season;
+      if (sort) params.sort = sort;
       const tempParams = parseTempRange(selectedTemp);
       if (tempParams.min !== undefined) params.min = tempParams.min;
       if (tempParams.max !== undefined) params.max = tempParams.max;
@@ -65,7 +68,7 @@ const OotdPostList = () => {
       }
       setHasMore(newPosts.length === LIMIT);
     },
-    [selectedTemp],
+    [selectedTemp, sort],
   );
 
   useEffect(() => {
@@ -79,7 +82,7 @@ const OotdPostList = () => {
     setPage(1);
     setHasMore(true);
     loadPosts(1, selectedSeason);
-  }, [selectedSeason, selectedTemp, loadPosts]);
+  }, [selectedSeason, selectedTemp, sort, loadPosts]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;

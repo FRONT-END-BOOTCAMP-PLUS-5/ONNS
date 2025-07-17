@@ -8,12 +8,23 @@ import Like from '@/public/assets/icons/heart.svg';
 import { useRouter } from 'next/navigation';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useSeasonStore } from '@/stores/seasonStore';
+import { usePathname } from 'next/navigation';
+
+function getCurrentSeason() {
+  const month = new Date().getMonth() + 1;
+  if (month >= 3 && month <= 5) return '봄';
+  if (month >= 6 && month <= 8) return '여름';
+  if (month >= 9 && month <= 11) return '가을';
+  return '겨울';
+}
 
 const LIMIT = 6;
 
 const OotdPostList = () => {
   const router = useRouter();
   const selectedSeason = useSeasonStore((state) => state.selectedSeason);
+  const pathname = usePathname();
+  const setSelectedSeason = useSeasonStore((state) => state.setSelectedSeason);
   const [posts, setPosts] = useState<BoardWithUser[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -30,6 +41,12 @@ const OotdPostList = () => {
     }
     setHasMore(newPosts.length === LIMIT);
   };
+
+  useEffect(() => {
+    if (pathname === '/ootd') {
+      setSelectedSeason(getCurrentSeason());
+    }
+  }, [pathname, setSelectedSeason]);
 
   useEffect(() => {
     setPosts([]);

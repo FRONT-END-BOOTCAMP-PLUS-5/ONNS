@@ -7,14 +7,13 @@ import GetMostLikedByTempUseCase from '@/(backend)/ootd/application/usecases/Get
 import CreateUseCase from '@/(backend)/ootd/application/usecases/CreateUseCase';
 import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostsUseCase';
 
-// 게시글 조회 (필터/정렬/페이지네이션)
+// 게시글 조회
 export async function GET(req: NextRequest) {
   try {
     // 인증
     const user = await getUserFromJWT();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // 쿼리 파라미터 파싱
     const { searchParams } = new URL(req.url);
     const sort = searchParams.get('sort') || 'recent';
     const page = parseInt(searchParams.get('page') || '1');

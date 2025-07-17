@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 't1.kakaocdn.net', port: '', pathname: '/**' },
       { protocol: 'https', hostname: 'example.com', port: '', pathname: '/**' },
       { protocol: 'https', hostname: 'i.pinimg.com', port: '', pathname: '/**' }, // 추가!
+      {
+        protocol: 'https',
+        hostname: 'fplqqqtqhiuuvszpepfu.supabase.co',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   // TurboPack 설정

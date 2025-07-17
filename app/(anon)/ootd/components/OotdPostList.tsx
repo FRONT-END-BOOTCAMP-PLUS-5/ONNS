@@ -71,7 +71,7 @@ const OotdPostList = () => {
                     <div className="flex justify-start items-center gap-2 ml-2">
                       {/* 댓글 수 */}
                       <div className="flex items-center gap-[4px] min-w-0">
-                        <Comment className="w-[16px] h-[16px] flex-shrink-0" />
+                        <Comment className="w-[16px] h-[16px] flex-shrink-0 text-[#6A71E5]" />
                         <div className="text-black text-sm font-medium leading-none">
                           {post.comment_count ?? 0}
                         </div>

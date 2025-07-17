@@ -3,7 +3,7 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { Navigation } from 'swiper/modules';
+import { Autoplay, Navigation } from 'swiper/modules';
 import { useRouter } from 'next/navigation';
 
 interface Slide {
@@ -33,11 +33,12 @@ const HomeCarousel = ({ slides }: HomeCarouselProps) => {
         }
       `}</style>
       <Swiper
-        modules={[Navigation]}
+        modules={[Navigation, Autoplay]}
         navigation={{
           nextEl: '.my-swiper-button-next',
           prevEl: '.my-swiper-button-prev',
         }}
+        autoplay={{ delay: 10000, disableOnInteraction: false }}
         spaceBetween={16}
         slidesPerView={1}
         loop

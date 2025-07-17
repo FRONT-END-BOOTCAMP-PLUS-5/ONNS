@@ -10,6 +10,7 @@ import { useLocation } from '@/hooks/useLocation';
 import { useWeather } from '@/hooks/useWeather';
 import TodayWeatherInfo from './components/TodayWeatherInfo';
 import api from '@/utils/axiosInstance';
+import HomeCarousel from './components/HomeCarousel';
 
 export default function HomeClient() {
   const searchParams = useSearchParams();
@@ -61,6 +62,7 @@ export default function HomeClient() {
       <div className="mt=[4px] text-neutral-800/40 text-xs font-light ml-4 mr-4 text-right">
         **체감온도 기준
       </div>
+      <HomeCarousel />
     </>
   );
 }

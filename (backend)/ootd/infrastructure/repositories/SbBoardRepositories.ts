@@ -223,7 +223,14 @@ class SbBoardRepository implements IBoardRepository {
   }
 
   // Get posts by season with optional filters
-  async getBySeason(season: string, sort?: string, min?: number, max?: number): Promise<Board[]> {
+  async getBySeason(
+    season: string,
+    sort?: string,
+    min?: number,
+    max?: number,
+    offset?: number,
+    limit?: number,
+  ): Promise<Board[]> {
     try {
       const { startDate, endDate } = this.getSeasonDateRange(season);
 
@@ -232,6 +239,13 @@ class SbBoardRepository implements IBoardRepository {
       // Apply temperature filters
       if (typeof min === 'number') query = query.gte('feels_like', min);
       if (typeof max === 'number') query = query.lte('feels_like', max);
+
+      // Apply pagination
+      if (typeof offset === 'number' && typeof limit === 'number') {
+        query = query.range(offset, offset + limit - 1);
+      } else if (typeof limit === 'number') {
+        query = query.limit(limit);
+      }
 
       query = query.order('date_created', { ascending: false });
 
@@ -253,10 +267,17 @@ class SbBoardRepository implements IBoardRepository {
   }
 
   // Get current season posts
-  async getCurrentSeasonPosts(sort?: string): Promise<Board[]> {
+  async getCurrentSeasonPosts(sort?: string, offset?: number, limit?: number): Promise<Board[]> {
     try {
       const currentSeason = this.getCurrentSeason();
-      const posts = await this.getBySeason(currentSeason, sort);
+      const posts = await this.getBySeason(
+        currentSeason,
+        sort,
+        undefined,
+        undefined,
+        offset,
+        limit,
+      );
 
       // Ensure latest posts first (unless sorting by popularity)
       if (sort !== 'popular') {

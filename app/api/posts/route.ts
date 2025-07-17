@@ -21,7 +21,9 @@ export async function GET(req: NextRequest) {
     // Query parameters
     const { searchParams } = new URL(req.url);
     const sort = searchParams.get('sort') || 'recent'; // recent, random, likes, temp
+    const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const offset = (page - 1) * limit;
     const order = searchParams.get('order') || 'desc';
     const season = searchParams.get('season') || null; // spring, summer, autumn, winter
     const currentTemp = parseInt(searchParams.get('temp') || '0'); // current temperature for temp-based filtering
@@ -73,9 +75,8 @@ export async function GET(req: NextRequest) {
         case 'recent':
         default:
           const getRecentPostsUseCase = new GetPostUseCase(boardRepository);
-          posts = await getRecentPostsUseCase.getCurrentSeasonPosts(user.id, sort);
+          posts = await getRecentPostsUseCase.getCurrentSeasonPosts(user.id, sort, offset, limit);
           message = '최신 게시글을 성공적으로 조회했습니다.';
-          posts = posts.slice(0, limit);
           break;
       }
     }

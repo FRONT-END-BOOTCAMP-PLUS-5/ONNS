@@ -101,7 +101,7 @@ const OotdPostList = () => {
                       alt=""
                       width={25}
                       height={25}
-                      className="rounded-full object-cover bg-secondary-e200"
+                      className="w-[25px] h-[25px] rounded-full object-cover bg-secondary-e200"
                       unoptimized
                     />
                   ) : (

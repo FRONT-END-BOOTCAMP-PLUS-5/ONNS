@@ -102,7 +102,7 @@ export default function HomeClient() {
         {`${feels_like}℃, 오늘 뭐 입지? \n 인기 코디 모아보기`}
       </div>
       <TopPosts posts={topPosts} />
-      <div className="mt-[32px] pb-[50px]">
+      <div className="mt-[32px] pb-[50px] px-[20px]">
         <MoreButton content="더 보러 가기" onClick={() => router.push('/ootd')} />
       </div>
     </>

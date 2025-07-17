@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import PostUserInfo from '@/app/(anon)/ootd/[id]/components/PostUserInfo';
-// import Image from 'next/image';
+import Image from 'next/image';
 import Heart from '@/public/assets/icons/heart.svg';
 import StrokeHeart from '@/public/assets/icons/stroke_heart.svg';
 import StrokeComment from '@/public/assets/icons/stroke_comment.svg';
@@ -152,14 +152,17 @@ export default function OotdDetail() {
               isMyPost={post.isMyPost}
               handlePostDelete={handlePostDelete}
             />
-            {/* <Image
-              src={post.photos && post.photos.length > 0 ? post.photos[0].img_url : ''}
-              alt="게시글 이미지"
-              className="w-full h-[429px] bg-neutral-200"
-              width={600}
-              height={429}
-            /> */}
-            <div className="w-full h-[429px] bg-neutral-200" />
+            <div className="relative w-full h-[429px] bg-neutral-200 object-cover">
+              <Image
+                src={post.photos && post.photos.length > 0 ? post.photos[0].img_url : ''}
+                alt="게시글 이미지"
+                className="object-cover"
+                fill
+                priority
+              />
+            </div>
+
+            {/* <div className="w-full h-[429px] bg-neutral-200" />  */}
             {/* 좋아요, 댓글 수 영역 */}
             <div className="flex flex-row ml-[20px] mr-[20px] pt-[12px] pb-[12px] ">
               <div onClick={handleLike} className="cursor-pointer">

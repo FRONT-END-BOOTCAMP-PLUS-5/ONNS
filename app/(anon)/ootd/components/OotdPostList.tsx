@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import axiosInstance from '@/utils/axiosInstance';
 import { BoardWithUser } from '@/(backend)/ootd/application/dtos/BoardDto';
 import Image from 'next/image';
@@ -49,21 +49,24 @@ const OotdPostList = () => {
     return {};
   }
 
-  const loadPosts = async (pageNum: number, season?: string) => {
-    const params: Record<string, string | number | undefined> = { page: pageNum, limit: LIMIT };
-    if (season) params.season = season;
-    const tempParams = parseTempRange(selectedTemp);
-    if (tempParams.min !== undefined) params.min = tempParams.min;
-    if (tempParams.max !== undefined) params.max = tempParams.max;
-    const res = await axiosInstance.get('http://localhost:3000/api/posts', { params });
-    const newPosts = res.data.data;
-    if (pageNum === 1) {
-      setPosts(newPosts);
-    } else {
-      setPosts((prev) => [...prev, ...newPosts]);
-    }
-    setHasMore(newPosts.length === LIMIT);
-  };
+  const loadPosts = useCallback(
+    async (pageNum: number, season?: string) => {
+      const params: Record<string, string | number | undefined> = { page: pageNum, limit: LIMIT };
+      if (season) params.season = season;
+      const tempParams = parseTempRange(selectedTemp);
+      if (tempParams.min !== undefined) params.min = tempParams.min;
+      if (tempParams.max !== undefined) params.max = tempParams.max;
+      const res = await axiosInstance.get('http://localhost:3000/api/posts', { params });
+      const newPosts = res.data.data;
+      if (pageNum === 1) {
+        setPosts(newPosts);
+      } else {
+        setPosts((prev) => [...prev, ...newPosts]);
+      }
+      setHasMore(newPosts.length === LIMIT);
+    },
+    [selectedTemp],
+  );
 
   useEffect(() => {
     if (pathname === '/ootd') {
@@ -76,7 +79,7 @@ const OotdPostList = () => {
     setPage(1);
     setHasMore(true);
     loadPosts(1, selectedSeason);
-  }, [selectedSeason, selectedTemp]);
+  }, [selectedSeason, selectedTemp, loadPosts]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;

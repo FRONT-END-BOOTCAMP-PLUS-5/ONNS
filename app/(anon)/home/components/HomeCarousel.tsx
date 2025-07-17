@@ -4,16 +4,22 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation } from 'swiper/modules';
+import { useRouter } from 'next/navigation';
 
+interface Slide {
+  id: number;
+  img: string;
+}
 interface HomeCarouselProps {
-  images: string[];
+  slides: Slide[];
 }
 
-const HomeCarousel = ({ images }: HomeCarouselProps) => {
-  if (images.length === 0) {
+const HomeCarousel = ({ slides }: HomeCarouselProps) => {
+  const router = useRouter();
+  if (slides.length === 0) {
     return (
       <div className="w-full h-[384px] flex items-center justify-center">
-        <div className="text-gray-500">표시할 이미지가 없습니다.</div>
+        <div className="text-gray-500">이미지가 로딩 중입니다.</div>
       </div>
     );
   }
@@ -37,9 +43,14 @@ const HomeCarousel = ({ images }: HomeCarouselProps) => {
         loop
         className="w-full h-[384px] custom-swiper"
       >
-        {images.map((src, idx) => (
-          <SwiperSlide key={idx}>
-            <img src={src} alt={`slide-${idx}`} className="w-full h-full object-cover pl-4 pr-4" />
+        {slides.map((slide, idx) => (
+          <SwiperSlide key={slide.id + '-' + idx}>
+            <img
+              src={slide.img}
+              alt={`slide-${slide.id}`}
+              className="w-full h-full object-cover pl-4 pr-4"
+              onClick={() => router.push(`/ootd/${slide.id}`)}
+            />
           </SwiperSlide>
         ))}
       </Swiper>

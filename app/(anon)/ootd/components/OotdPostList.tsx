@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useSeasonStore } from '@/stores/seasonStore';
 import { usePathname } from 'next/navigation';
+import { useTempFilterStore } from '@/stores/tempFilterStore';
 
 function getCurrentSeason() {
   const month = new Date().getMonth() + 1;
@@ -28,10 +29,32 @@ const OotdPostList = () => {
   const [posts, setPosts] = useState<BoardWithUser[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const selectedTemp = useTempFilterStore((state) => state.selectedTemp);
+
+  // 온도 구간 파싱 함수 (TempFlt와 동일하게 유지)
+  function parseTempRange(tempRange: string) {
+    if (tempRange === '전체') return {};
+    if (tempRange.includes('-')) {
+      const [min, max] = tempRange.split('-').map(Number);
+      return { min, max };
+    }
+    if (tempRange.endsWith('~')) {
+      const min = Number(tempRange.replace('~', ''));
+      return { min };
+    }
+    if (tempRange.startsWith('~')) {
+      const max = Number(tempRange.replace('~', ''));
+      return { max };
+    }
+    return {};
+  }
 
   const loadPosts = async (pageNum: number, season?: string) => {
     const params: Record<string, string | number | undefined> = { page: pageNum, limit: LIMIT };
     if (season) params.season = season;
+    const tempParams = parseTempRange(selectedTemp);
+    if (tempParams.min !== undefined) params.min = tempParams.min;
+    if (tempParams.max !== undefined) params.max = tempParams.max;
     const res = await axiosInstance.get('http://localhost:3000/api/posts', { params });
     const newPosts = res.data.data;
     if (pageNum === 1) {
@@ -53,7 +76,7 @@ const OotdPostList = () => {
     setPage(1);
     setHasMore(true);
     loadPosts(1, selectedSeason);
-  }, [selectedSeason]);
+  }, [selectedSeason, selectedTemp]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;

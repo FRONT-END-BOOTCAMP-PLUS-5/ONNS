@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useLoginModal } from '@/hooks/useLoginModal';
 import { Header, KakaoLoginModalContainer } from '@/app/components';
 import WeatherIndex from './components/WeatherIndex';
@@ -10,6 +10,8 @@ import { useLocation } from '@/hooks/useLocation';
 import { useWeather } from '@/hooks/useWeather';
 import TodayWeatherInfo from './components/TodayWeatherInfo';
 import api from '@/utils/axiosInstance';
+import HomeCarousel from './components/HomeCarousel';
+import { Post } from '@/types/posts';
 
 export default function HomeClient() {
   const searchParams = useSearchParams();
@@ -19,6 +21,8 @@ export default function HomeClient() {
   const { lat, lon } = useLocation();
   useWeather(lat, lon);
   const { cityName, feels_like, umbrellaIndex, dustIndex } = useWeatherStore();
+
+  const [carouselImages, setCarouselImages] = useState<string[]>([]);
 
   useEffect(() => {
     if (searchParams.get('login') === '1' && !isAuthenticated && !loading) {
@@ -45,10 +49,26 @@ export default function HomeClient() {
     }
   }, [feels_like]);
 
+  const fetchCarouselData = useCallback(async () => {
+    try {
+      const res = await api.get(`/posts?sort=random&temp=${feels_like}`);
+      if (res.data.success && res.data.data) {
+        const allImages = (res.data.data as Post[]).flatMap((post) =>
+          post.photos.map((photo) => photo.img_url),
+        );
+        setCarouselImages(allImages);
+      }
+    } catch (error) {
+      console.error('캐러셀 데이터 가져오기 실패:', error);
+      setCarouselImages([]);
+    }
+  }, []);
+
   useEffect(() => {
     handleRandomPostsByTemp();
     handleMostLikedPostsByTemp();
-  }, [handleRandomPostsByTemp, handleMostLikedPostsByTemp]);
+    fetchCarouselData();
+  }, [handleRandomPostsByTemp, handleMostLikedPostsByTemp, fetchCarouselData]);
 
   return (
     <>
@@ -61,6 +81,13 @@ export default function HomeClient() {
       <div className="mt=[4px] text-neutral-800/40 text-xs font-light ml-4 mr-4 text-right">
         **체감온도 기준
       </div>
+      <div className="text-black text-[24px] font-semibold mb-[16px] mt-[6px] ml-4 mr-4">
+        OOTD, 이건 어때요?
+      </div>
+      <HomeCarousel images={carouselImages} />
+      {/* <div className="text-black text-[24px] font-semibold mb-[16px] mt-[6px] ml-4 mr-4 whitespace-pre-line leading-[28px] mt-[24px]">
+        {`${feels_like}℃, 오늘 뭐 입지? \n 인기 코디 모아보기`}
+      </div> */}
     </>
   );
 }

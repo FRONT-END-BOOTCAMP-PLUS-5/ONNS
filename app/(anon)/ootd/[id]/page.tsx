@@ -13,6 +13,7 @@ import api from '@/utils/axiosInstance';
 import type { CommentWithUser } from '@/(backend)/comments/application/dtos/CommentDto';
 import type { BoardWithUser } from '@/(backend)/ootd/application/dtos/BoardDto';
 import { formatDate } from '@/utils/date/formatDate';
+import { useCallback } from 'react';
 
 //ootd detail
 export default function OotdDetail() {
@@ -29,7 +30,7 @@ export default function OotdDetail() {
   const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
 
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     try {
       setIsLoadingPost(true);
       const res = await api.get(`/posts/${id}`);
@@ -41,9 +42,9 @@ export default function OotdDetail() {
     } finally {
       setIsLoadingPost(false);
     }
-  };
+  }, [id]);
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       setIsLoadingComments(true);
       const res = await api.get(`/posts/${id}/comments`);
@@ -52,9 +53,9 @@ export default function OotdDetail() {
     } finally {
       setIsLoadingComments(false);
     }
-  };
+  }, [id]);
 
-  const fetchLikeStatus = async () => {
+  const fetchLikeStatus = useCallback(async () => {
     try {
       const res = await api.get(`/posts/${id}/likes`);
       setIsLiked(res.data.isLiked);
@@ -62,7 +63,7 @@ export default function OotdDetail() {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [id]);
 
   const handlePostDelete = async () => {
     try {
@@ -126,15 +127,15 @@ export default function OotdDetail() {
 
   useEffect(() => {
     fetchPost();
-  }, [id]);
+  }, [id, fetchPost]);
 
   useEffect(() => {
     fetchComments();
-  }, [id]);
+  }, [id, fetchComments]);
 
   useEffect(() => {
     fetchLikeStatus();
-  }, [id]);
+  }, [id, fetchLikeStatus]);
 
   return (
     <>

@@ -1,5 +1,5 @@
 import EditPencil from '@/public/assets/icons/edit_pencil.svg';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '@/utils/axiosInstance';
 
 const ProfileNameEdit = ({ userName }: { userName: string | null }) => {
@@ -14,6 +14,11 @@ const ProfileNameEdit = ({ userName }: { userName: string | null }) => {
       setTempUserName(userName);
     }
   }, [userName]);
+
+  const handleCancel = useCallback(() => {
+    setNewUserName(tempUserName); // Restore original value
+    setIsEditing(false);
+  }, [tempUserName]);
 
   // Handle click outside to cancel editing
   useEffect(() => {
@@ -31,7 +36,7 @@ const ProfileNameEdit = ({ userName }: { userName: string | null }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isEditing]);
+  }, [isEditing, handleCancel]);
 
   const handleNameEditClick = (e: React.MouseEvent<HTMLDivElement>) => {
     setIsEditing(true);
@@ -50,11 +55,6 @@ const ProfileNameEdit = ({ userName }: { userName: string | null }) => {
     } else {
       console.error('Error editing name:', res.data.error);
     }
-  };
-
-  const handleCancel = () => {
-    setNewUserName(tempUserName); // Restore original value
-    setIsEditing(false);
   };
 
   // Show loading state while userName is null

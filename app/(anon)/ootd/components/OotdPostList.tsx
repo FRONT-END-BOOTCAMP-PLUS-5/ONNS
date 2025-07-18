@@ -7,40 +7,47 @@ import Comment from '@/public/assets/icons/chat.svg';
 import Like from '@/public/assets/icons/heart.svg';
 import { useRouter } from 'next/navigation';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { useSeasonStore } from '@/stores/seasonStore';
+
+const LIMIT = 6;
 
 const OotdPostList = () => {
   const router = useRouter();
+  const selectedSeason = useSeasonStore((state) => state.selectedSeason);
   const [posts, setPosts] = useState<BoardWithUser[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchPosts = async (pageNum: number) => {
-    const res = await axiosInstance.get('http://localhost:3000/api/posts', {
-      params: { page: pageNum, limit: 6 },
-    });
+  const loadPosts = async (pageNum: number, season?: string) => {
+    const params: Record<string, string | number | undefined> = { page: pageNum, limit: LIMIT };
+    if (season) params.season = season;
+    const res = await axiosInstance.get('http://localhost:3000/api/posts', { params });
     const newPosts = res.data.data;
     if (pageNum === 1) {
       setPosts(newPosts);
     } else {
       setPosts((prev) => [...prev, ...newPosts]);
     }
-    setHasMore(newPosts.length === 6);
+    setHasMore(newPosts.length === LIMIT);
   };
 
   useEffect(() => {
-    fetchPosts(1);
-  }, []);
+    setPosts([]);
+    setPage(1);
+    setHasMore(true);
+    loadPosts(1, selectedSeason);
+  }, [selectedSeason]);
 
-  const fetchNext = () => {
+  const handleLoadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    fetchPosts(nextPage);
+    loadPosts(nextPage, selectedSeason);
   };
 
   return (
     <InfiniteScroll
       dataLength={posts.length}
-      next={fetchNext}
+      next={handleLoadMore}
       hasMore={hasMore}
       loader={<div>로딩중...</div>}
       endMessage={
@@ -89,14 +96,12 @@ const OotdPostList = () => {
                         {post.user?.name ?? '익명'}
                       </div>
                       <div className="flex justify-start items-center gap-2 ml-2">
-                        {/* 댓글 수 */}
                         <div className="flex items-center gap-[4px] min-w-0">
                           <Comment className="w-[16px] h-[16px] flex-shrink-0 text-[#6A71E5]" />
                           <div className="text-black text-sm font-medium leading-none">
                             {post.comment_count ?? 0}
                           </div>
                         </div>
-                        {/* 좋아요 수 */}
                         <div className="flex items-center gap-1 min-w-0">
                           <Like className="w-[16px] h-[16px] flex-shrink-0" />
                           <div className="text-black text-sm font-medium leading-none">

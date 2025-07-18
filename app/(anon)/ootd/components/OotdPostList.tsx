@@ -33,21 +33,30 @@ const OotdPostList = () => {
   const selectedTemp = useTempFilterStore((state) => state.selectedTemp);
   const sort = useSortStore((state) => state.sort);
 
-  // 온도 구간 파싱 함수 (TempFlt와 동일하게 유지)
+  // 온도 구간 파싱 함수 (모든 형식 지원)
   function parseTempRange(tempRange: string) {
     if (tempRange === '전체') return {};
-    if (tempRange.includes('-')) {
+
+    // "0-4" 형식 처리
+    if (tempRange.includes('-') && !tempRange.includes('~')) {
       const [min, max] = tempRange.split('-').map(Number);
       return { min, max };
     }
-    if (tempRange.endsWith('~')) {
-      const min = Number(tempRange.replace('~', ''));
-      return { min };
-    }
-    if (tempRange.startsWith('~')) {
-      const max = Number(tempRange.replace('~', ''));
+
+    // "~(-6)" 형식 처리
+    if (tempRange.startsWith('~(') && tempRange.endsWith(')')) {
+      const max = Number(tempRange.replace('~(', '').replace(')', ''));
       return { max };
     }
+
+    // "-5~ -1" 형식 처리 (공백 제거)
+    if (tempRange.includes('~')) {
+      const [minStr, maxStr] = tempRange.split('~');
+      const min = minStr.trim() !== '' ? Number(minStr.trim()) : undefined;
+      const max = maxStr.trim() !== '' ? Number(maxStr.trim()) : undefined;
+      return { ...(min !== undefined ? { min } : {}), ...(max !== undefined ? { max } : {}) };
+    }
+
     return {};
   }
 

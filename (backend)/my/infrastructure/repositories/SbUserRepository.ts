@@ -1,6 +1,11 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IUserRepository } from '../../domain/repositories/IUserRepository';
-import { User, UserLike, UserPost } from '../../domain/entities/User';
+import {
+  IUserRepository,
+  PaginationParams,
+  PaginatedResponse,
+  PostWithPhotos,
+} from '../../domain/repositories/IUserRepository';
+import { User } from '../../domain/entities/User';
 
 export class SbUserRepository implements IUserRepository {
   constructor(private readonly supabase: SupabaseClient) {}
@@ -24,21 +29,82 @@ export class SbUserRepository implements IUserRepository {
     return data;
   }
 
-  async getUserLikes(userId: number): Promise<UserLike[]> {
-    const { data, error } = await this.supabase
-      .from('likes')
-      .select('post_id, user_id')
-      .eq('user_id', userId);
+  async getUserLikes(
+    userId: number,
+    pagination?: PaginationParams,
+  ): Promise<PaginatedResponse<PostWithPhotos>> {
+    const page = pagination?.page || 1;
+    const limit = pagination?.limit || 10;
+    const offset = (page - 1) * limit;
 
-    if (error || !data) return [];
-    return data;
+    // Get posts that user has liked with full details including photos
+    const { data: likes, error } = await this.supabase
+      .from('likes')
+      .select(
+        `
+        post_id,
+        post (
+          id,
+          date_created,
+          photos:photo (
+            id,
+            img_url
+          )
+        )
+      `,
+      )
+      .eq('user_id', userId)
+      .order('post(date_created)', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error || !likes) {
+      console.error('Error fetching user likes:', error);
+      return { data: [], hasMore: false };
+    }
+
+    // Transform the data to match the expected format
+    const posts = likes.map((item) => item.post).filter(Boolean) as unknown as PostWithPhotos[];
+
+    return {
+      data: posts,
+      hasMore: likes.length === limit,
+    };
   }
 
-  async getUserPosts(userId: number): Promise<UserPost[]> {
-    const { data, error } = await this.supabase.from('posts').select('*').eq('user_id', userId);
+  async getUserPosts(
+    userId: number,
+    pagination?: PaginationParams,
+  ): Promise<PaginatedResponse<PostWithPhotos>> {
+    const page = pagination?.page || 1;
+    const limit = pagination?.limit || 10;
+    const offset = (page - 1) * limit;
 
-    if (error || !data) return [];
-    return data;
+    // Get user's posts with full details including photos
+    const { data: posts, error } = await this.supabase
+      .from('post')
+      .select(
+        `
+        id,
+        date_created,
+        photos:photo (
+          id,
+          img_url
+        )
+      `,
+      )
+      .eq('user_id', userId)
+      .order('date_created', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error || !posts) {
+      console.error('Error fetching user posts:', error);
+      return { data: [], hasMore: false };
+    }
+
+    return {
+      data: posts as unknown as PostWithPhotos[],
+      hasMore: posts.length === limit,
+    };
   }
 
   async uploadProfileImage(

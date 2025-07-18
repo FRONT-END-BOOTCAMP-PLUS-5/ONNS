@@ -9,6 +9,7 @@ import api from '@/utils/axiosInstance';
 export default function My() {
   const [userName, setUserName] = useState<string | null>(null);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [isToggleSetForMine, setIsToggleSetForMine] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchProfileInfo = async () => {
@@ -39,7 +40,10 @@ export default function My() {
         userName={userName}
         onProfileUpdate={handleProfileUpdate}
       />
-      <ToggleBar />
+      <ToggleBar
+        setIsToggleSetForMine={setIsToggleSetForMine}
+        isToggleSetForMine={isToggleSetForMine}
+      />
     </div>
   );
 }

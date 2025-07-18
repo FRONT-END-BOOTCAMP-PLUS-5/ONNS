@@ -37,10 +37,10 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ type }) => {
 
         if (type === 'my') {
           // Fetch user's own posts
-          response = await api.get(`/users/me/posts?page=${pageNum}&limit=6`);
+          response = await api.get(`/users/me/posts?page=${pageNum}&limit=10`);
         } else {
           // Fetch user's liked posts
-          response = await api.get(`/users/me/likes?page=${pageNum}&limit=6`);
+          response = await api.get(`/users/me/likes?page=${pageNum}&limit=10`);
         }
 
         if (response.data.ok) {
@@ -66,8 +66,6 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ type }) => {
           } else {
             setPhotos((prev) => [...prev, ...newPhotos]);
           }
-
-          console.log('photos', newPhotos);
 
           // Check if we have more data based on API response
           setHasMore(response.data.hasMore || false);

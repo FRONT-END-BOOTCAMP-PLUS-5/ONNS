@@ -76,6 +76,9 @@ api.interceptors.response.use(
       }
     }
 
+    if (!error.response || error.response.status !== 401) {
+      console.error(error);
+    }
     return Promise.reject(error);
   },
 );

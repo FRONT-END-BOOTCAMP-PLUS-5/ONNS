@@ -15,11 +15,11 @@ const TopPosts = ({ posts }: TopPostsProps) => {
 
   return (
     <div className="px-4">
-      <div className="grid grid-cols-2 gap-x-[16px] gap-y-4">
+      <div className="grid grid-cols-2 gap-2">
         {top8.map((post) => (
           <div
             key={post.id}
-            className="w-full h-[250px] relative overflow-hidden"
+            className="w-full aspect-square relative overflow-hidden rounded-[4px]"
             onClick={() => router.push(`/ootd/${post.id}`)}
           >
             <Image

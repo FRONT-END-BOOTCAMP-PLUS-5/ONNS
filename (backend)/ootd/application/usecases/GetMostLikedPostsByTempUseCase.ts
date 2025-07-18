@@ -10,7 +10,7 @@ class GetMostLikedByTempUseCase {
   }
 
   async execute(
-    myUserId: number,
+    myUserId: number | undefined,
     currentTemp: number,
     limit: number = 8,
   ): Promise<BoardWithUser[]> {

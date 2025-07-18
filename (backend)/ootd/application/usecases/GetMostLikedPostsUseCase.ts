@@ -9,7 +9,7 @@ class GetMostLikedPostsUseCase {
     this.boardRepository = boardRepository;
   }
 
-  async execute(myUserId: number, limit: number = 8): Promise<BoardWithUser[]> {
+  async execute(myUserId?: number, limit: number = 8): Promise<BoardWithUser[]> {
     try {
       const boards = await this.boardRepository.getMostLikedPosts(limit);
       return boards.map((board) => BoardMapper.toDomain(board, myUserId));

@@ -110,7 +110,7 @@ class SbBoardRepository implements IBoardRepository {
   }
 
   // 게시글 ID로 상세 조회
-  async getById(id: string, myUserId: number): Promise<Board | null> {
+  async getById(id: string, myUserId?: number): Promise<Board | null> {
     try {
       const { data, error } = await this.buildPostQuery().eq('id', id).single();
 

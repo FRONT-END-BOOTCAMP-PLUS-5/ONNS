@@ -1,17 +1,15 @@
 import SbBoardRepository from '../../infrastructure/repositories/SbBoardRepositories';
 import Board from '../../domain/entities/Board';
-
 class GetPostDetailUseCase {
   private boardRepository: SbBoardRepository;
-
   constructor(boardRepository: SbBoardRepository) {
     this.boardRepository = boardRepository;
   }
 
   // 게시글 상세 조회
-  async getPostById(id: string): Promise<Board | null> {
+  async getPostById(id: string, myUserId: number): Promise<Board | null> {
     try {
-      const post = await this.boardRepository.getById(id);
+      const post = await this.boardRepository.getById(id, myUserId);
       return post;
     } catch (error) {
       console.error('Error fetching post detail:', error);
@@ -19,5 +17,4 @@ class GetPostDetailUseCase {
     }
   }
 }
-
 export default GetPostDetailUseCase;

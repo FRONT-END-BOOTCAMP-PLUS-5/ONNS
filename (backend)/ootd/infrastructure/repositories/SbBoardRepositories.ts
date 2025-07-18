@@ -82,8 +82,8 @@ class SbBoardRepository implements IBoardRepository {
 
     if (season === '겨울') {
       return {
-        startDate: new Date(year - 1, 11, 1).toISOString(),
-        endDate: new Date(year, 2, 1).toISOString(),
+        startDate: new Date(year, 11, 1).toISOString(),
+        endDate: new Date(year + 1, 2, 0, 23, 59, 59, 999).toISOString(),
       };
     }
 
@@ -95,7 +95,7 @@ class SbBoardRepository implements IBoardRepository {
     const [startMonth, endMonth] = months;
     return {
       startDate: new Date(year, startMonth - 1, 1).toISOString(),
-      endDate: new Date(year, endMonth, 1).toISOString(),
+      endDate: new Date(year, endMonth, 0, 23, 59, 59, 999).toISOString(), // 해당 월의 마지막 날 23:59:59
     };
   }
 
@@ -251,15 +251,20 @@ class SbBoardRepository implements IBoardRepository {
 
       // 인기순 정렬: 최신순 정렬(order by date_created)을 적용하지 않음
       if (sort === 'popular') {
-        const { data, error } = await query;
+        // limit, offset 없이 전체 데이터 조회
+        const { data, error } = await this.buildPostQuery()
+          .gte('date_created', startDate)
+          .lt('date_created', endDate);
         if (error) throw error;
         const postsWithCounts = this.transformBoardDataArray(data || []);
         // 좋아요 내림차순, 같으면 최신순
-        return postsWithCounts.slice().sort((a, b) => {
+        const sorted = postsWithCounts.slice().sort((a, b) => {
           const likeDiff = (b.like_count || 0) - (a.like_count || 0);
           if (likeDiff !== 0) return likeDiff;
           return new Date(b.date_created).getTime() - new Date(a.date_created).getTime();
         });
+        // 페이지네이션 적용
+        return sorted.slice(offset ?? 0, (offset ?? 0) + (limit ?? 10));
       }
 
       // 최신순 정렬

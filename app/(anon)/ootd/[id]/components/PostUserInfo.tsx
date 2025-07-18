@@ -44,7 +44,7 @@ const PostUserInfo = ({
               className="rounded-full bg-neutral-200"
             />
           </div>
-          <div className="w-[120px] align-middle text-[14px] font-medium text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+          <div className="w-[120px] align-middle text-[14px] font-medium text-sm whitespace-nowrap overflow-hidden text-ellipsis text-balck">
             {nickname}
           </div>
         </div>

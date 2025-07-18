@@ -112,7 +112,7 @@ export default function HomeClient() {
       console.error('인기 게시글 가져오기 실패:', error);
       setTopPosts([]);
     }
-  }, []);
+  }, [feels_like]);
 
   useEffect(() => {
     fetchCarouselData();

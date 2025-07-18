@@ -21,9 +21,12 @@ api.interceptors.response.use(
 
       if (isRefreshing && refreshPromise) {
         try {
+          console.log('Waiting for existing refresh...');
           await refreshPromise;
+          console.log('Refresh completed, retrying request...');
           return api(originalRequest);
         } catch (refreshError) {
+          console.log('Refresh failed, redirecting to login...');
           window.location.href = '/?login=1';
           return Promise.reject(refreshError);
         }
@@ -39,10 +42,16 @@ api.interceptors.response.use(
       refreshPromise = refreshAxios
         .post('/auth/refresh')
         .then(() => {
+          console.log('Token refresh successful');
           isRefreshing = false;
           refreshPromise = null;
         })
         .catch((refreshError) => {
+          console.log(
+            'Token refresh failed:',
+            refreshError.response?.status,
+            refreshError.response?.data,
+          );
           isRefreshing = false;
           refreshPromise = null;
           window.location.href = '/?login=1';

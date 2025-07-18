@@ -5,6 +5,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import { Autoplay, Navigation } from 'swiper/modules';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface Slide {
   id: number;
@@ -46,10 +47,11 @@ const HomeCarousel = ({ slides }: HomeCarouselProps) => {
       >
         {slides.map((slide, idx) => (
           <SwiperSlide key={slide.id + '-' + idx}>
-            <img
+            <Image
               src={slide.img}
               alt={`slide-${slide.id}`}
-              className="w-full h-full object-cover pl-4 pr-4"
+              fill
+              className="object-cover pl-4 pr-4 cursor-pointer"
               onClick={() => router.push(`/ootd/${slide.id}`)}
             />
           </SwiperSlide>

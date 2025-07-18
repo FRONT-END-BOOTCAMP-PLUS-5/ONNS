@@ -41,7 +41,7 @@ const MoreButton: React.FC<MoreButtonProps> = ({ content, onClick }) => {
     >
       <button className="font-medium text-lg">
         <div className="flex items-center gap-[8px]">
-          <p className="whitespace-normal">{content}</p>
+          <p className="whitespace-normal text-black">{content}</p>
           <Right />
         </div>
       </button>

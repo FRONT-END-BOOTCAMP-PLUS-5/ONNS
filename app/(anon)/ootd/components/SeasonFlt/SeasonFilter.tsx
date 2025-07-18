@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import Arrow from '@/public/assets/icons/arrow.svg';
+import { useSeasonStore } from '@/stores/seasonStore';
 
 interface DropdownProps<T> {
   selected: T;
@@ -17,6 +18,8 @@ function SeasonFilter<T extends string | number>({
   setIsOpen,
   ref,
 }: DropdownProps<T>) {
+  const { setSelectedSeason } = useSeasonStore();
+
   return (
     <div>
       <div ref={ref} className="relative inline-block pl-[20px] pt-[32px]">
@@ -40,6 +43,7 @@ function SeasonFilter<T extends string | number>({
                 onClick={() => {
                   setSelected('봄' as T);
                   setIsOpen(false);
+                  setSelectedSeason('봄');
                 }}
                 style={{ cursor: 'pointer' }}
               >
@@ -55,6 +59,7 @@ function SeasonFilter<T extends string | number>({
                 onClick={() => {
                   setSelected('여름' as T);
                   setIsOpen(false);
+                  setSelectedSeason('여름');
                 }}
                 style={{ cursor: 'pointer' }}
               >
@@ -70,6 +75,7 @@ function SeasonFilter<T extends string | number>({
                 onClick={() => {
                   setSelected('가을' as T);
                   setIsOpen(false);
+                  setSelectedSeason('가을');
                 }}
                 style={{ cursor: 'pointer' }}
               >
@@ -85,6 +91,7 @@ function SeasonFilter<T extends string | number>({
                 onClick={() => {
                   setSelected('겨울' as T);
                   setIsOpen(false);
+                  setSelectedSeason('겨울');
                 }}
                 style={{ cursor: 'pointer' }}
               >

@@ -26,7 +26,7 @@ const HomeCarousel = ({ slides }: HomeCarouselProps) => {
   }
 
   return (
-    <div className="relative">
+    <div className="relative ml-4 mr-4">
       <style jsx global>{`
         .swiper .swiper-button-next,
         .swiper .swiper-button-prev {
@@ -47,13 +47,20 @@ const HomeCarousel = ({ slides }: HomeCarouselProps) => {
       >
         {slides.map((slide, idx) => (
           <SwiperSlide key={slide.id + '-' + idx}>
-            <Image
-              src={slide.img}
-              alt={`slide-${slide.id}`}
-              fill
-              className="object-cover pl-4 pr-4 cursor-pointer"
-              onClick={() => router.push(`/ootd/${slide.id}`)}
-            />
+            {/* 
+           1. 반드시 "rounded"와 "overflow-hidden"을 같은 div에!
+           2. "relative"와 w/h 지정도 같이!
+         */}
+            <div className="relative w-full h-[384px] rounded-[6px] overflow-hidden">
+              <Image
+                src={slide.img}
+                alt={`slide-${slide.id}`}
+                fill
+                className="object-cover cursor-pointer"
+                onClick={() => router.push(`/ootd/${slide.id}`)}
+                priority
+              />
+            </div>
           </SwiperSlide>
         ))}
       </Swiper>

@@ -3,18 +3,18 @@ import Board from '@/(backend)/ootd/domain/entities/Board';
 import IBoardRepository from '@/(backend)/ootd/domain/repositories/IBoradRepository';
 import BoardMapper from '@/(backend)/ootd/infrastructure/mapper/BoardMapper';
 
-// Constants for better maintainability
+// 유지보수를 위한 상수
 const SEASON_MONTHS = {
   봄: [3, 5],
   여름: [6, 8],
   가을: [9, 11],
-  겨울: [12, 2], // Special case handled separately
+  겨울: [12, 2], // 겨울은 별도 처리
 } as const;
 
 const DEFAULT_TEMP_RANGE = 5;
 const DEFAULT_POST_LIMIT = 8;
 
-// Type for raw database response
+// 데이터베이스 응답 타입
 interface RawBoardData {
   id: number;
   text: string;
@@ -34,7 +34,7 @@ interface RawBoardData {
 class SbBoardRepository implements IBoardRepository {
   constructor(private readonly supabase: SupabaseClient) {}
 
-  // Common query builder for posts with related data
+  // 게시글 및 연관 데이터 쿼리 빌더
   private buildPostQuery() {
     return this.supabase.from('post').select(`
         *, 
@@ -45,7 +45,7 @@ class SbBoardRepository implements IBoardRepository {
       `);
   }
 
-  // Transform raw data to Board entity with proper counts
+  // 원시 데이터를 Board 엔티티로 변환
   private transformBoardData(data: RawBoardData): Board {
     return {
       ...data,
@@ -56,12 +56,12 @@ class SbBoardRepository implements IBoardRepository {
     };
   }
 
-  // Transform array of raw data
+  // 원시 데이터 배열을 Board 엔티티 배열로 변환
   private transformBoardDataArray(data: RawBoardData[]): Board[] {
     return data.map((post) => this.transformBoardData(post));
   }
 
-  // Validate user permissions for post operations
+  // 게시글 작업 권한 검증
   private async validateUserPermission(postId: string, userId: number): Promise<void> {
     const { data: post, error } = await this.supabase
       .from('post')
@@ -75,31 +75,31 @@ class SbBoardRepository implements IBoardRepository {
     }
   }
 
-  // Get season date range
+  // 계절에 따른 날짜 범위 반환
   private getSeasonDateRange(season: string): { startDate: string; endDate: string } {
     const now = new Date();
     const year = now.getFullYear();
 
     if (season === '겨울') {
       return {
-        startDate: new Date(year - 1, 11, 1).toISOString(),
-        endDate: new Date(year, 2, 1).toISOString(),
+        startDate: new Date(year, 11, 1).toISOString(),
+        endDate: new Date(year + 1, 2, 0, 23, 59, 59, 999).toISOString(),
       };
     }
 
     const months = SEASON_MONTHS[season as keyof typeof SEASON_MONTHS];
     if (!months) {
-      throw new Error(`Invalid season: ${season}`);
+      throw new Error(`잘못된 계절: ${season}`);
     }
 
     const [startMonth, endMonth] = months;
     return {
       startDate: new Date(year, startMonth - 1, 1).toISOString(),
-      endDate: new Date(year, endMonth, 1).toISOString(),
+      endDate: new Date(year, endMonth, 0, 23, 59, 59, 999).toISOString(), // 해당 월의 마지막 날 23:59:59
     };
   }
 
-  // Get current season based on current month
+  // 현재 월을 기준으로 현재 계절 반환
   private getCurrentSeason(): string {
     const month = new Date().getMonth() + 1;
 
@@ -109,7 +109,7 @@ class SbBoardRepository implements IBoardRepository {
     return '겨울';
   }
 
-  // Post detail by ID
+  // 게시글 ID로 상세 조회
   async getById(id: string, myUserId: number): Promise<Board | null> {
     try {
       const { data, error } = await this.buildPostQuery().eq('id', id).single();
@@ -119,12 +119,12 @@ class SbBoardRepository implements IBoardRepository {
 
       return BoardMapper.toDomain(this.transformBoardData(data), myUserId);
     } catch (error) {
-      console.error('Error fetching post by ID:', error);
+      console.error('ID로 게시글 조회 오류:', error);
       throw error;
     }
   }
 
-  // Create new post
+  // 게시글 생성
   async create(
     board: Omit<
       Board,
@@ -154,10 +154,10 @@ class SbBoardRepository implements IBoardRepository {
 
       if (error) throw error;
       if (!data) {
-        throw new Error('Failed to create post: No data returned');
+        throw new Error('게시글 생성 실패: 데이터 없음');
       }
 
-      // Save images if provided
+      // 이미지가 있으면 저장
       if (img_url?.length) {
         const photoData = img_url.map((imgUrl) => ({
           post_id: data.id,
@@ -167,28 +167,28 @@ class SbBoardRepository implements IBoardRepository {
         const { error: photoError } = await this.supabase.from('photo').insert(photoData);
 
         if (photoError) {
-          throw new Error(`Failed to save photos: ${photoError.message}`);
+          throw new Error(`사진 저장 실패: ${photoError.message}`);
         }
       }
 
-      // Fetch complete post data with related information
+      // 연관 정보 포함 전체 게시글 데이터 조회
       const { data: fullData, error: fetchError } = await this.buildPostQuery()
         .eq('id', data.id)
         .single();
 
       if (fetchError) {
-        console.error('Error fetching created post with photos:', fetchError);
+        console.error('사진 포함 게시글 조회 오류:', fetchError);
         return data as Board;
       }
 
       return this.transformBoardData(fullData);
     } catch (error) {
-      console.error('Error creating post:', error);
+      console.error('게시글 생성 오류:', error);
       throw error;
     }
   }
 
-  // Update post text content
+  // 게시글 내용 수정
   async update(id: string, updateData: Partial<Board>, userId: number): Promise<void> {
     try {
       await this.validateUserPermission(id, userId);
@@ -200,29 +200,29 @@ class SbBoardRepository implements IBoardRepository {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error updating post:', error);
+      console.error('게시글 수정 오류:', error);
       throw error;
     }
   }
 
-  // Delete post and related data
+  // 게시글 및 연관 데이터 삭제
   async delete(id: string, userId: number): Promise<void> {
     try {
       await this.validateUserPermission(id, userId);
 
-      // Delete related photos first
+      // 연관 사진 먼저 삭제
       await this.supabase.from('photo').delete().eq('post_id', id);
 
-      // Delete the post
+      // 게시글 삭제
       const { error } = await this.supabase.from('post').delete().eq('id', id);
       if (error) throw error;
     } catch (error) {
-      console.error('Error deleting post:', error);
+      console.error('게시글 삭제 오류:', error);
       throw error;
     }
   }
 
-  // Get posts by season with optional filters
+  // 계절 및 온도(옵션)로 게시글 조회
   async getBySeason(
     season: string,
     sort?: string,
@@ -236,37 +236,50 @@ class SbBoardRepository implements IBoardRepository {
 
       let query = this.buildPostQuery().gte('date_created', startDate).lt('date_created', endDate);
 
-      // Apply temperature filters
-      if (typeof min === 'number') query = query.gte('feels_like', min);
-      if (typeof max === 'number') query = query.lte('feels_like', max);
+      // 온도 필터 적용
+      const minNum = Number(min);
+      const maxNum = Number(max);
+      if (!isNaN(minNum)) query = query.gte('feels_like', minNum);
+      if (!isNaN(maxNum)) query = query.lte('feels_like', maxNum);
 
-      // Apply pagination
+      // 페이지네이션 적용
       if (typeof offset === 'number' && typeof limit === 'number') {
         query = query.range(offset, offset + limit - 1);
       } else if (typeof limit === 'number') {
         query = query.limit(limit);
       }
 
-      query = query.order('date_created', { ascending: false });
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      const postsWithCounts = this.transformBoardDataArray(data || []);
-
-      // Apply sorting if specified
+      // 인기순 정렬: 최신순 정렬(order by date_created)을 적용하지 않음
       if (sort === 'popular') {
-        return postsWithCounts.sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
+        // limit, offset 없이 전체 데이터 조회
+        const { data, error } = await this.buildPostQuery()
+          .gte('date_created', startDate)
+          .lt('date_created', endDate);
+        if (error) throw error;
+        const postsWithCounts = this.transformBoardDataArray(data || []);
+        // 좋아요 내림차순, 같으면 최신순
+        const sorted = postsWithCounts.slice().sort((a, b) => {
+          const likeDiff = (b.like_count || 0) - (a.like_count || 0);
+          if (likeDiff !== 0) return likeDiff;
+          return new Date(b.date_created).getTime() - new Date(a.date_created).getTime();
+        });
+        // 페이지네이션 적용
+        return sorted.slice(offset ?? 0, (offset ?? 0) + (limit ?? 10));
       }
 
+      // 최신순 정렬
+      query = query.order('date_created', { ascending: false });
+      const { data, error } = await query;
+      if (error) throw error;
+      const postsWithCounts = this.transformBoardDataArray(data || []);
       return postsWithCounts;
     } catch (error) {
-      console.error('Error fetching posts by season:', error);
+      console.error('계절별 게시글 조회 오류:', error);
       throw error;
     }
   }
 
-  // Get current season posts
+  // 현재 계절 게시글 조회
   async getCurrentSeasonPosts(sort?: string, offset?: number, limit?: number): Promise<Board[]> {
     try {
       const currentSeason = this.getCurrentSeason();
@@ -279,7 +292,7 @@ class SbBoardRepository implements IBoardRepository {
         limit,
       );
 
-      // Ensure latest posts first (unless sorting by popularity)
+      // 최신순 정렬(인기순이 아니면)
       if (sort !== 'popular') {
         return posts.sort(
           (a, b) => new Date(b.date_created).getTime() - new Date(a.date_created).getTime(),
@@ -288,12 +301,12 @@ class SbBoardRepository implements IBoardRepository {
 
       return posts;
     } catch (error) {
-      console.error('Error fetching current season posts:', error);
+      console.error('현재 계절 게시글 조회 오류:', error);
       throw error;
     }
   }
 
-  // Get random posts
+  // 랜덤 게시글 조회
   async getRandomPosts(limit: number = DEFAULT_POST_LIMIT): Promise<Board[]> {
     try {
       const { data, error } = await this.buildPostQuery()
@@ -304,12 +317,12 @@ class SbBoardRepository implements IBoardRepository {
 
       return this.transformBoardDataArray(data || []);
     } catch (error) {
-      console.error('Error fetching random posts:', error);
+      console.error('랜덤 게시글 조회 오류:', error);
       throw error;
     }
   }
 
-  // Get most liked posts
+  // 인기 게시글 조회
   async getMostLikedPosts(limit: number = DEFAULT_POST_LIMIT): Promise<Board[]> {
     try {
       const { data, error } = await this.buildPostQuery().order('date_created', {
@@ -324,12 +337,12 @@ class SbBoardRepository implements IBoardRepository {
         .sort((a, b) => (b.like_count || 0) - (a.like_count || 0))
         .slice(0, limit);
     } catch (error) {
-      console.error('Error fetching most liked posts:', error);
+      console.error('인기 게시글 조회 오류:', error);
       throw error;
     }
   }
 
-  // Get most liked posts by temperature range
+  // 온도 범위로 인기 게시글 조회
   async getMostLikedPostsByTemp(
     currentTemp: number,
     tempRange: number = DEFAULT_TEMP_RANGE,
@@ -352,7 +365,33 @@ class SbBoardRepository implements IBoardRepository {
         .sort((a, b) => (b.like_count || 0) - (a.like_count || 0))
         .slice(0, limit);
     } catch (error) {
-      console.error('Error fetching most liked posts by temperature:', error);
+      console.error('온도별 인기 게시글 조회 오류:', error);
+      throw error;
+    }
+  }
+
+  // 계절+온도 범위로 게시글 조회
+  async getByTempRange(
+    season: string,
+    minTemp: number,
+    maxTemp: number,
+    offset: number = 0,
+    limit: number = DEFAULT_POST_LIMIT,
+  ): Promise<Board[]> {
+    try {
+      const { data, error } = await this.buildPostQuery()
+        .eq('season', season)
+        .gte('feels_like', minTemp)
+        .lte('feels_like', maxTemp)
+        .order('date_created', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (error) throw error;
+
+      const postsWithCounts = this.transformBoardDataArray(data || []);
+      return postsWithCounts;
+    } catch (error) {
+      console.error('계절+온도 범위 게시글 조회 오류:', error);
       throw error;
     }
   }

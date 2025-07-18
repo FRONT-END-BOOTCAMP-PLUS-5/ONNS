@@ -11,13 +11,22 @@ function getCurrentSeason() {
   return '겨울';
 }
 
-const OotdSeasonDropdown = () => {
+interface OotdSeasonDropdownProps {
+  onSeasonChange?: (season: string) => void;
+}
+
+const OotdSeasonDropdown = ({ onSeasonChange }: OotdSeasonDropdownProps) => {
   const { isOpen, setIsOpen, selected, setSelected, ref } = useDropdown(getCurrentSeason());
+
+  const handleSeasonChange = (newSeason: string) => {
+    setSelected(newSeason);
+    onSeasonChange?.(newSeason);
+  };
 
   return (
     <SeasonFilter
       selected={selected}
-      setSelected={setSelected}
+      setSelected={handleSeasonChange}
       isOpen={isOpen}
       setIsOpen={setIsOpen}
       ref={ref}

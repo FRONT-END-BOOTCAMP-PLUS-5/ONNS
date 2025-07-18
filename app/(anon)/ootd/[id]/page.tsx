@@ -173,12 +173,16 @@ export default function OotdDetail() {
                   <StrokeHeart className="w-[24px] h-[24px] mr-[3px]" />
                 )}
               </div>
-              <span className="text-[14px] align-middle font-normal mr-[10px]">{likeCount}</span>
+              <span className="text-[14px] align-middle font-normal mr-[10px] text-black">
+                {likeCount}
+              </span>
               <StrokeComment className="w-[24px] h-[24px] mb-[4px] mr-[3px]" />
-              <span className="text-[14px] align-middle font-normal">{commentCount}</span>
+              <span className="text-[14px] align-middle font-normal text-black">
+                {commentCount}
+              </span>
             </div>
             {/* 텍스트 영역 */}
-            <div className="ml-[20px] mr-[20px] text-[14px] font-normal leading-[21px] whitespace-pre-line">
+            <div className="ml-[20px] mr-[20px] text-[14px] font-normal leading-[21px] whitespace-pre-line text-black">
               {post.text}
             </div>
             <span className="text-xs text-gray-400 ml-[20px] mr-[20px]">

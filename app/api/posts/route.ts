@@ -135,8 +135,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. 이미지 URL 생성
-    const imageUrl = supabase.storage.from('your-bucket-name').getPublicUrl(fileName)
-      .data.publicUrl;
+    const imageUrl = supabase.storage.from('ootd-img').getPublicUrl(fileName).data.publicUrl;
 
     // 4. 게시글 저장
     const supabaseClient = supabase;

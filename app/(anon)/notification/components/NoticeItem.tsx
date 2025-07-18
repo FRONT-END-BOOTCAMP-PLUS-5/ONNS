@@ -64,13 +64,11 @@ const NoticeItem: React.FC<NoticeItemProps> = ({ type, user, timestamp, isRead, 
             {getIcon()}
           </div>
           <div className="flex-1 flex flex-col justify-center gap-[4px]">
-            <div className="px-[4px] flex items-center">
-              <div className="text-center justify-start text-[16px] text-black">{getText()}</div>
+            <div className="flex items-center">
+              <p className="text-center justify-start text-[16px] text-black">{getText()}</p>
             </div>
             <div className="self-stretch px-[4px] inline-flex justify-start items-center">
-              <div className="text-center justify-start text-[#949494] text-[13px]">
-                {timestamp}
-              </div>
+              <p className="text-center justify-start text-[#949494] text-[13px]">{timestamp}</p>
             </div>
           </div>
         </div>

@@ -2,96 +2,47 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useCallback, useState } from 'react';
-import { useLoginModal } from '@/hooks/useLoginModal';
+import api from '@/utils/axiosInstance';
+
 import { Header, KakaoLoginModalContainer, MoreButton } from '@/app/components';
 import WeatherIndex from './components/WeatherIndex';
-import { useWeatherStore } from '@/stores/weatherState';
+import TodayWeatherInfo from './components/TodayWeatherInfo';
+import HomeCarousel from './components/HomeCarousel';
+import TopPosts from './components/TopPosts';
+
 import { useLocation } from '@/hooks/useLocation';
 import { useWeather } from '@/hooks/useWeather';
-import TodayWeatherInfo from './components/TodayWeatherInfo';
-import api from '@/utils/axiosInstance';
+import { useLoginModal } from '@/hooks/useLoginModal';
+
 import { useAuthStore } from '@/stores/authStore';
-import HomeCarousel from './components/HomeCarousel';
+import { useWeatherStore } from '@/stores/weatherState';
+
 import { Post } from '@/types/posts';
-import TopPosts from './components/TopPosts';
 
 export default function HomeClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { showLoginModal, handleOpenModal, isAuthenticated, loading, handleCloseModal } =
-    useLoginModal();
-
-  const { isJwtAuthenticated, hasUnreadNotification, checkJwt, setHasUnreadNotification } =
-    useAuthStore();
-
   const { lat, lon } = useLocation();
   useWeather(lat, lon);
   const { cityName, feels_like, umbrellaIndex, dustIndex } = useWeatherStore();
-
   const [carouselSlides, setCarouselSlides] = useState<{ id: number; img: string }[]>([]);
   const [topPosts, setTopPosts] = useState<{ id: number; img: string }[]>([]);
+  const { showLoginModal, handleOpenModal, isAuthenticated, loading, handleCloseModal } =
+    useLoginModal();
+  const { isJwtAuthenticated, hasUnreadNotification, checkJwt, setHasUnreadNotification } =
+    useAuthStore();
 
-  useEffect(() => {
-    checkJwt();
-  }, [checkJwt]);
-
-  useEffect(() => {
-    if (searchParams.get('login') === '1' && !isAuthenticated && !loading) {
-      handleOpenModal();
-    }
-  }, [searchParams, isAuthenticated, loading, handleOpenModal]);
-
-  const handleCloseModalAndRemoveLoginParam = () => {
-    handleCloseModal();
-    const params = new URLSearchParams(window.location.search);
-    params.delete('login');
-    window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
-  };
-
-  useEffect(() => {
-    console.log('useEffect 실행', isJwtAuthenticated);
-    if (!isJwtAuthenticated) {
-      setHasUnreadNotification(undefined);
-      return;
-    }
-    const fetchUnreadNotifications = async () => {
-      try {
-        const response = await api.get('/notifications?hasUnread=true');
-        setHasUnreadNotification(response.data.hasUnread);
-      } catch {
-        setHasUnreadNotification(undefined); // 호출 실패 시 아이콘 숨김
-      }
-    };
-    fetchUnreadNotifications();
-  }, [isJwtAuthenticated, setHasUnreadNotification]);
-
-  console.log(
-    'isJwtAuthenticated:',
-    isJwtAuthenticated,
-    'hasUnreadNotification:',
-    hasUnreadNotification,
-  );
-
-  const handleLogin = () => {
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY}&redirect_uri=${process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI}&response_type=code`;
-    window.location.href = kakaoAuthUrl;
-  };
-
-  const fetchCarouselData = useCallback(async () => {
+  // 게시글
+  const fetchCarouselSlides = useCallback(async () => {
     try {
       const res = await api.get(`/posts?sort=random&temp=${feels_like}`);
       if (res.data.success && res.data.data) {
-        // id와 이미지를 묶어서 slides 배열 생성
         const slides = (res.data.data as Post[]).flatMap((post) =>
-          post.photos.map((photo) => ({
-            id: post.id,
-            img: photo.img_url,
-          })),
+          post.photos.map((photo) => ({ id: post.id, img: photo.img_url })),
         );
         setCarouselSlides(slides);
       }
-    } catch (error) {
-      console.error('캐러셀 데이터 가져오기 실패:', error);
+    } catch {
       setCarouselSlides([]);
     }
   }, [feels_like]);
@@ -101,26 +52,65 @@ export default function HomeClient() {
       const res = await api.get(`/posts?sort=likes&temp=${feels_like}`);
       if (res.data.success && res.data.data) {
         const topPosts = (res.data.data as Post[]).flatMap((post) =>
-          post.photos.map((photo) => ({
-            id: post.id,
-            img: photo.img_url,
-          })),
+          post.photos.map((photo) => ({ id: post.id, img: photo.img_url })),
         );
         setTopPosts(topPosts);
       }
-    } catch (error) {
-      console.error('인기 게시글 가져오기 실패:', error);
+    } catch {
       setTopPosts([]);
     }
   }, [feels_like]);
 
+  //로그인 상태 체크
   useEffect(() => {
-    fetchCarouselData();
-  }, [fetchCarouselData]);
+    checkJwt();
+  }, [checkJwt]);
+
+  //로그인 모달 오픈
+  useEffect(() => {
+    if (searchParams.get('login') === '1' && !isAuthenticated && !loading) {
+      handleOpenModal();
+    }
+  }, [searchParams, isAuthenticated, loading, handleOpenModal]);
+
+  //알림 상태 fetch
+  useEffect(() => {
+    if (!isJwtAuthenticated) {
+      setHasUnreadNotification(undefined);
+      return;
+    }
+    const fetchUnreadNotifications = async () => {
+      try {
+        const response = await api.get('/notifications?hasUnread=true');
+        setHasUnreadNotification(response.data.hasUnread);
+      } catch {
+        setHasUnreadNotification(undefined);
+      }
+    };
+    fetchUnreadNotifications();
+  }, [isJwtAuthenticated, setHasUnreadNotification]);
+
+  //게시글 fetch
+  useEffect(() => {
+    fetchCarouselSlides();
+  }, [fetchCarouselSlides]);
 
   useEffect(() => {
     fetchTopPosts();
   }, [fetchTopPosts]);
+
+  //핸들러
+  const handleCloseModalAndRemoveLoginParam = () => {
+    handleCloseModal();
+    const params = new URLSearchParams(window.location.search);
+    params.delete('login');
+    window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+  };
+
+  const handleLogin = () => {
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY}&redirect_uri=${process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI}&response_type=code`;
+    window.location.href = kakaoAuthUrl;
+  };
 
   return (
     <>

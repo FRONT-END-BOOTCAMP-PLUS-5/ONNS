@@ -1,9 +1,7 @@
 import SbBoardRepository from '../../infrastructure/repositories/SbBoardRepositories';
 import Board from '../../domain/entities/Board';
-
 class GetPostDetailUseCase {
   private boardRepository: SbBoardRepository;
-
   constructor(boardRepository: SbBoardRepository) {
     this.boardRepository = boardRepository;
   }
@@ -19,5 +17,4 @@ class GetPostDetailUseCase {
     }
   }
 }
-
 export default GetPostDetailUseCase;

@@ -1,20 +1,25 @@
 import ProfileEdit from '@/public/assets/icons/profile_edit.svg';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import defaultPic from '@/public/assets/images/test_profile.jpg';
 
 interface ProfilePicEditProps {
   onClick: () => void;
   profilePicture: string | null;
+  isUploading?: boolean;
 }
 
-const ProfilePicEdit = ({ profilePicture, onClick }: ProfilePicEditProps) => {
+const ProfilePicEdit = ({ profilePicture, onClick, isUploading = false }: ProfilePicEditProps) => {
   const [imageError, setImageError] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | null>(profilePicture || defaultPic.src);
 
-  // Default avatar image (using existing test profile image)
-  const defaultAvatar = '/assets/images/test_profile.jpg';
-
-  // Use default avatar if no profile picture or if image failed to load
-  const imageSrc = !profilePicture || imageError ? defaultAvatar : profilePicture;
+  useEffect(() => {
+    if (!profilePicture || imageError) {
+      setImageSrc(defaultPic.src);
+    } else {
+      setImageSrc(profilePicture);
+    }
+  }, [profilePicture, imageError]);
 
   return (
     <div className="relative">
@@ -22,7 +27,7 @@ const ProfilePicEdit = ({ profilePicture, onClick }: ProfilePicEditProps) => {
         <Image
           fill
           className="rounded-full object-cover"
-          src={imageSrc}
+          src={imageSrc || defaultPic.src}
           alt="profile picture"
           sizes="121px"
           priority
@@ -30,7 +35,11 @@ const ProfilePicEdit = ({ profilePicture, onClick }: ProfilePicEditProps) => {
         />
       </div>
       <div className="w-[26px] h-[26px] absolute bottom-[3px] right-[6px] rounded-full shadow-[4px_4px_4px_0px_rgba(0,0,0,0.13)] cursor-pointer hover:bg-gray-50 transition-colors z-10 bg-white flex items-center justify-center">
-        <ProfileEdit className="ml-[1.75px]" onClick={onClick} />
+        {isUploading ? (
+          <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+        ) : (
+          <ProfileEdit className="ml-[1.75px]" onClick={onClick} />
+        )}
       </div>
     </div>
   );

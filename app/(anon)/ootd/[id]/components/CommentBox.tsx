@@ -59,7 +59,7 @@ const CommentBox = ({
         <div className="flex-1">
           <div className="flex items-center gap-2 justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-medium text-[14px] text-gray-800">{user.name}</span>
+              <span className="font-medium text-[14px] text-black">{user.name}</span>
               <span className="text-xs text-gray-400">{formatDate(date_created)}</span>
             </div>
             {isMyComment && (

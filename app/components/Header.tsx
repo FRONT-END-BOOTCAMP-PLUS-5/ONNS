@@ -31,6 +31,7 @@ const Header = ({
     if (isClose) {
       router.back();
     } else if (isHome) {
+      if (hasUnreadNotification === undefined) return;
       router.push('/notification');
     }
   };

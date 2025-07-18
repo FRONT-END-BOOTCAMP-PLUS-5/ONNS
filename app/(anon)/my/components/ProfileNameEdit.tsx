@@ -62,7 +62,7 @@ const ProfileNameEdit = ({ userName }: { userName: string | null }) => {
     return (
       <div className="inline-flex justify-start items-center gap-1 relative">
         <div className="text-center justify-start text-gray-400 text-base font-medium font-['Pretendard']">
-          Loading...
+          <span>&nbsp;</span>
         </div>
       </div>
     );

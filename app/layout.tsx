@@ -35,12 +35,12 @@ export default function RootLayout({
       <body
         className={`${pretendard.className} flex justify-center min-h-screen overflow-x-hidden relative`}
       >
-        <div className="hidden lg:flex items-center justify-center w-[calc((100vw-430px)/2)] absolute left-0 top-1/2 -translate-y-1/2 origin-left bg-[#EEEEF4]">
+        <div className="hidden lg:flex items-center justify-center w-[calc((100vw-430px)/2)] fixed left-0 top-1/2 -translate-y-1/2 origin-left bg-[#EEEEF4]">
           <p
-            className={`${bmJua.className} flex flex-col items-center leading-[100px] text-center font-bold text-4xl text-[var(--b400)]`}
+            className={`${bmJua.className} flex flex-col items-center text-center font-bold text-4xl text-[var(--b400)]`}
           >
             오늘은 뭐 입지? 고민 끝!
-            <br /> <Logo height={150} width={150} />
+            <br /> <Logo height={150} width={150} className={'mt-[50px]'} />
           </p>
         </div>
 

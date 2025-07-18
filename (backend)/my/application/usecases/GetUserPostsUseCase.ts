@@ -1,13 +1,20 @@
-import { IUserRepository } from '../../domain/repositories/IUserRepository';
-import { UserPost } from '../../domain/entities/User';
+import {
+  IUserRepository,
+  PaginationParams,
+  PaginatedResponse,
+  PostWithPhotos,
+} from '../../domain/repositories/IUserRepository';
 
 export class GetUserPostsUseCase {
   constructor(private userRepository: IUserRepository) {}
 
-  async execute(userId: number): Promise<UserPost[]> {
+  async execute(
+    userId: number,
+    pagination?: PaginationParams,
+  ): Promise<PaginatedResponse<PostWithPhotos>> {
     try {
-      const posts = await this.userRepository.getUserPosts(userId);
-      return posts;
+      const result = await this.userRepository.getUserPosts(userId, pagination);
+      return result;
     } catch (error) {
       console.error('Error fetching user posts:', error);
       throw error;

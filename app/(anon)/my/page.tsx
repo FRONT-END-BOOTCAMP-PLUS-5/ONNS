@@ -1,9 +1,9 @@
 'use client';
 
-import ToggleBar from './components/ToggleBar';
 import { useEffect, useState } from 'react';
-import ProfileEditHeader from './components/ProfileEditHeader';
 import api from '@/utils/axiosInstance';
+import ToggleBar from './components/ToggleBar';
+import ProfileEditHeader from './components/ProfileEditHeader';
 
 //my
 export default function My() {

@@ -6,6 +6,15 @@ const api = axios.create({
 
 let isRefreshing = false;
 let refreshPromise: Promise<void> | null = null;
+let isRedirecting = false;
+
+const redirectToLogin = () => {
+  if (!isRedirecting) {
+    isRedirecting = true;
+    console.log('Redirecting to login...');
+    window.location.href = '/?login=1';
+  }
+};
 
 api.interceptors.response.use(
   (response) => response,
@@ -13,6 +22,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (originalRequest.url === '/auth/refresh') {
+      redirectToLogin();
       return Promise.reject(error);
     }
 
@@ -26,8 +36,7 @@ api.interceptors.response.use(
           console.log('Refresh completed, retrying request...');
           return api(originalRequest);
         } catch (refreshError) {
-          console.log('Refresh failed, redirecting to login...');
-          window.location.href = '/?login=1';
+          redirectToLogin();
           return Promise.reject(refreshError);
         }
       }
@@ -54,7 +63,7 @@ api.interceptors.response.use(
           );
           isRefreshing = false;
           refreshPromise = null;
-          window.location.href = '/?login=1';
+          redirectToLogin();
           return Promise.reject(refreshError);
         });
 
@@ -62,7 +71,7 @@ api.interceptors.response.use(
         await refreshPromise;
         return api(originalRequest);
       } catch (refreshError) {
-        window.location.href = '/?login=1';
+        redirectToLogin();
         return Promise.reject(refreshError);
       }
     }

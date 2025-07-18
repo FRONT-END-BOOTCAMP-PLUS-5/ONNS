@@ -7,6 +7,7 @@ interface ButtonProps {
   content: string;
   disabled?: boolean;
   onClick?: () => void;
+  type?: 'submit' | 'button';
 }
 
 interface MoreButtonProps {
@@ -14,7 +15,13 @@ interface MoreButtonProps {
   onClick?: () => void;
 }
 
-const Button: React.FC<ButtonProps> = ({ content, disabled = false, big = true, onClick }) => {
+const Button: React.FC<ButtonProps> = ({
+  content,
+  disabled = false,
+  big = true,
+  onClick,
+  type,
+}) => {
   return (
     <div
       className={`flex items-center mx-[20px] justify-center rounded-[26px] border-[1.50px] shadow-[0px_0px_12px_0px_rgba(30,30,30,0.32)] ${
@@ -23,6 +30,7 @@ const Button: React.FC<ButtonProps> = ({ content, disabled = false, big = true, 
       onClick={disabled ? undefined : onClick}
     >
       <button
+        type={type}
         className={`font-medium ${disabled ? 'text-black' : 'text-white'} ${
           big ? 'text-xl' : 'text-lg'
         }`}

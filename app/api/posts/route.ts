@@ -107,15 +107,41 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: '로그인이 필요합니다.' }, { status: 401 });
     }
 
+    // 1. FormData 파싱
+    const formData = await req.formData();
+    const file = formData.get('image') as File | null;
+    const text = formData.get('text') as string | null;
+    const feels_likeStr = formData.get('feels_like') as string | null;
+    const feels_like = feels_likeStr ? Number(feels_likeStr) : null;
+
+    if (!file || !text || !feels_like) {
+      return NextResponse.json(
+        { message: '이미지, 내용, 체감온도 모두 필요합니다.' },
+        { status: 400 },
+      );
+    }
+
+    // 2. Supabase Storage에 이미지 업로드
+    const fileName = `${user.id}_${Date.now()}_${file.name}`;
+    const { data, error } = await supabase.storage
+      .from('ootd-img') // 실제 버킷 이름으로 변경!
+      .upload(fileName, file, { contentType: file.type });
+
+    if (data) {
+      console.log(data);
+    }
+    if (error) {
+      return NextResponse.json({ message: '이미지 업로드 실패', error }, { status: 500 });
+    }
+
+    // 3. 이미지 URL 생성
+    const imageUrl = supabase.storage.from('your-bucket-name').getPublicUrl(fileName)
+      .data.publicUrl;
+
+    // 4. 게시글 저장
     const supabaseClient = supabase;
     const repository = new SbBoardRepository(supabaseClient);
     const createUseCase = new CreateUseCase(repository);
-
-    const body = await req.json();
-    const { text, feels_like, img_url } = body;
-
-    // img_url이 문자열이면 배열로 변환
-    const imgUrls = img_url ? (Array.isArray(img_url) ? img_url : [img_url]) : [];
 
     const created = await createUseCase.execute(
       {
@@ -123,7 +149,7 @@ export async function POST(req: NextRequest) {
         feels_like,
         user_id: user.id,
       },
-      imgUrls,
+      [imageUrl],
     );
 
     return NextResponse.json(created, { status: 201 });

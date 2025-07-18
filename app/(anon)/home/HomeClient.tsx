@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useLoginModal } from '@/hooks/useLoginModal';
 import { Header, KakaoLoginModalContainer } from '@/app/components';
 import WeatherIndex from './components/WeatherIndex';
@@ -10,22 +10,23 @@ import { useLocation } from '@/hooks/useLocation';
 import { useWeather } from '@/hooks/useWeather';
 import TodayWeatherInfo from './components/TodayWeatherInfo';
 import api from '@/utils/axiosInstance';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function HomeClient() {
   const searchParams = useSearchParams();
   const { showLoginModal, handleOpenModal, isAuthenticated, loading, handleCloseModal } =
     useLoginModal();
-  const [hasUnreadNotification, setHasUnreadNotification] = useState<boolean | undefined>(
-    undefined,
-  );
+
+  const { isJwtAuthenticated, hasUnreadNotification, checkJwt, setHasUnreadNotification } =
+    useAuthStore();
 
   const { lat, lon } = useLocation();
   useWeather(lat, lon);
   const { cityName, feels_like, umbrellaIndex, dustIndex } = useWeatherStore();
 
-  // JWT 토큰이 쿠키에 있으면 인증된 것으로 간주
-  const isJwtAuthenticated =
-    typeof window !== 'undefined' && !!document.cookie.match(/(^| )token=([^;]+)/);
+  useEffect(() => {
+    checkJwt();
+  }, [checkJwt]);
 
   useEffect(() => {
     if (searchParams.get('login') === '1' && !isAuthenticated && !loading) {
@@ -33,24 +34,30 @@ export default function HomeClient() {
     }
   }, [searchParams, isAuthenticated, loading, handleOpenModal]);
 
+  const handleCloseModalAndRemoveLoginParam = () => {
+    handleCloseModal();
+    const params = new URLSearchParams(window.location.search);
+    params.delete('login');
+    window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+  };
+
   useEffect(() => {
+    console.log('useEffect 실행', isJwtAuthenticated);
     if (!isJwtAuthenticated) {
       setHasUnreadNotification(undefined);
-      console.log('JWT 없음: hasUnreadNotification 초기화(undefined)');
       return;
     }
     const fetchUnreadNotifications = async () => {
       try {
-        const response = await api.get('/notification/unread');
+        const response = await api.get('/notifications?hasUnread=true');
         setHasUnreadNotification(response.data.hasUnread);
-        console.log('알림 fetch:', response.data.hasUnread);
       } catch {
         setHasUnreadNotification(undefined); // 호출 실패 시 아이콘 숨김
-        console.log('알림 fetch 실패: undefined');
       }
     };
     fetchUnreadNotifications();
-  }, [isJwtAuthenticated]);
+  }, [isJwtAuthenticated, setHasUnreadNotification]);
+
   console.log(
     'isJwtAuthenticated:',
     isJwtAuthenticated,
@@ -63,29 +70,13 @@ export default function HomeClient() {
     window.location.href = kakaoAuthUrl;
   };
 
-  const handleRandomPostsByTemp = useCallback(async () => {
-    if (feels_like) {
-      const res = await api.get(`/posts?sort=random&temp=${feels_like}`);
-      console.log(res.data);
-    }
-  }, [feels_like]);
-
-  const handleMostLikedPostsByTemp = useCallback(async () => {
-    if (feels_like) {
-      const res = await api.get(`/posts?sort=likes&temp=${feels_like}`);
-      console.log(res.data);
-    }
-  }, [feels_like]);
-
-  useEffect(() => {
-    handleRandomPostsByTemp();
-    handleMostLikedPostsByTemp();
-  }, [handleRandomPostsByTemp, handleMostLikedPostsByTemp]);
-
   return (
     <>
       {showLoginModal && (
-        <KakaoLoginModalContainer onLogin={handleLogin} onClose={handleCloseModal} />
+        <KakaoLoginModalContainer
+          onLogin={handleLogin}
+          onClose={handleCloseModalAndRemoveLoginParam}
+        />
       )}
       <Header
         isHome={true}

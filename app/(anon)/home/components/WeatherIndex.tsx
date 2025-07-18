@@ -16,7 +16,7 @@ const WeatherIndex = ({ umbrellaIndex, dustIndex }: WeatherIndexProps) => {
 
   return (
     <>
-      <div className="w-full h-9 bg-neutral-200/50 flex items-center overflow-hidden mb-[22px]">
+      <div className="w-full h-9 bg-neutral-200/50 flex items-center overflow-hidden">
         <div
           className="flex whitespace-nowrap text-sm px-2"
           style={{

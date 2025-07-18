@@ -22,7 +22,7 @@ export default function HomeClient() {
   useWeather(lat, lon);
   const { cityName, feels_like, umbrellaIndex, dustIndex } = useWeatherStore();
 
-  const [carouselSlides, setCarouselSlides] = useState<{ id: number; img: string }[]>([]);
+  const [carouselImages, setCarouselImages] = useState<string[]>([]);
 
   useEffect(() => {
     if (searchParams.get('login') === '1' && !isAuthenticated && !loading) {
@@ -53,20 +53,16 @@ export default function HomeClient() {
     try {
       const res = await api.get(`/posts?sort=random&temp=${feels_like}`);
       if (res.data.success && res.data.data) {
-        // id와 이미지를 묶어서 slides 배열 생성
-        const slides = (res.data.data as Post[]).flatMap((post) =>
-          post.photos.map((photo) => ({
-            id: post.id,
-            img: photo.img_url,
-          })),
+        const allImages = (res.data.data as Post[]).flatMap((post) =>
+          post.photos.map((photo) => photo.img_url),
         );
-        setCarouselSlides(slides);
+        setCarouselImages(allImages);
       }
     } catch (error) {
       console.error('캐러셀 데이터 가져오기 실패:', error);
-      setCarouselSlides([]);
+      setCarouselImages([]);
     }
-  }, [feels_like]);
+  }, []);
 
   useEffect(() => {
     handleRandomPostsByTemp();
@@ -88,7 +84,7 @@ export default function HomeClient() {
       <div className="text-black text-[24px] font-semibold mb-[16px] mt-[6px] ml-4 mr-4">
         OOTD, 이건 어때요?
       </div>
-      <HomeCarousel slides={carouselSlides} />
+      <HomeCarousel images={carouselImages} />
       {/* <div className="text-black text-[24px] font-semibold mb-[16px] mt-[6px] ml-4 mr-4 whitespace-pre-line leading-[28px] mt-[24px]">
         {`${feels_like}℃, 오늘 뭐 입지? \n 인기 코디 모아보기`}
       </div> */}

@@ -1,15 +1,12 @@
 'use client';
 
-import ProfileHeader from './components/ProfileHeader';
 import ToggleBar from './components/ToggleBar';
 import { useEffect, useState } from 'react';
 import ProfileEditHeader from './components/ProfileEditHeader';
-import { useEditStore } from '@/stores/editState';
 import api from '@/utils/axiosInstance';
 
 //my
 export default function My() {
-  const { isEdit } = useEditStore();
   const [userName, setUserName] = useState<string | null>(null);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
@@ -31,13 +28,17 @@ export default function My() {
     fetchProfileInfo();
   }, []);
 
+  const handleProfileUpdate = (newProfilePicture: string | null) => {
+    setProfilePicture(newProfilePicture);
+  };
+
   return (
     <div className="w-full h-[100vh]">
-      {isEdit ? (
-        <ProfileEditHeader profilePicture={profilePicture} userName={userName} />
-      ) : (
-        <ProfileHeader profilePicture={profilePicture} userName={userName} />
-      )}
+      <ProfileEditHeader
+        profilePicture={profilePicture}
+        userName={userName}
+        onProfileUpdate={handleProfileUpdate}
+      />
       <ToggleBar />
     </div>
   );

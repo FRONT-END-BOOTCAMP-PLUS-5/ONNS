@@ -12,11 +12,9 @@ import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostsUseCas
 /* 게시글 조회 (다양한 정렬 및 필터링) */
 export async function GET(req: NextRequest) {
   try {
-    // 토큰 인증
+    // 토큰 인증 (선택적 - 로그인하지 않은 사용자도 게시글을 볼 수 있음)
     const user = await getUserFromJWT();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const userId = user?.id || 0; // 로그인하지 않은 경우 0으로 설정
 
     // Query parameters
     const { searchParams } = new URL(req.url);
@@ -47,7 +45,7 @@ export async function GET(req: NextRequest) {
           if (currentTemp && !isNaN(currentTemp)) {
             const getRandomPostsByTempUseCase = new GetRandomPostsByTempUseCase(boardRepository);
             posts = await getRandomPostsByTempUseCase.execute({
-              myUserId: user.id,
+              myUserId: userId,
               currentTemp,
               tempRange: 5,
               limit,
@@ -55,7 +53,7 @@ export async function GET(req: NextRequest) {
             message = `현재 온도(${currentTemp}°C) 기준 ±5도 범위 내 랜덤 게시글을 성공적으로 조회했습니다.`;
           } else {
             const getRandomPostsUseCase = new GetRandomPostsUseCase(boardRepository);
-            posts = await getRandomPostsUseCase.execute(user.id, limit);
+            posts = await getRandomPostsUseCase.execute(userId, limit);
             message = '랜덤 게시글을 성공적으로 조회했습니다.';
           }
           break;
@@ -63,11 +61,11 @@ export async function GET(req: NextRequest) {
         case 'likes':
           if (!currentTemp || isNaN(currentTemp)) {
             const getMostLikedPostsUseCase = new GetMostLikedPostsUseCase(boardRepository);
-            posts = await getMostLikedPostsUseCase.execute(user.id, limit);
+            posts = await getMostLikedPostsUseCase.execute(userId, limit);
             message = '인기 게시글을 성공적으로 조회했습니다.';
           } else {
             const getMostLikedByTempUseCase = new GetMostLikedByTempUseCase(boardRepository);
-            posts = await getMostLikedByTempUseCase.execute(user.id, currentTemp, limit);
+            posts = await getMostLikedByTempUseCase.execute(userId, currentTemp, limit);
             message = `현재 온도(${currentTemp}°C) 기준 ±5도 범위 내 인기 게시글을 성공적으로 조회했습니다.`;
           }
           break;
@@ -75,7 +73,7 @@ export async function GET(req: NextRequest) {
         case 'recent':
         default:
           const getRecentPostsUseCase = new GetPostUseCase(boardRepository);
-          posts = await getRecentPostsUseCase.getCurrentSeasonPosts(user.id, sort, offset, limit);
+          posts = await getRecentPostsUseCase.getCurrentSeasonPosts(userId, sort, offset, limit);
           message = '최신 게시글을 성공적으로 조회했습니다.';
           break;
       }

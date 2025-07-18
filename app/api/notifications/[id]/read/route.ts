@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUserFromJWT } from '@/utils/auth/tokenAuth';
 import { SbNotiRepository } from '@/(backend)/notifications/infrastructure/repositories/SbNotiRepository';
-import { MarkAsReadUseCase } from '@/(backend)/notifications/application/usecases/MarkAsReadUseCase';
+import { UpdateNotificationReadUseCase } from '@/(backend)/notifications/application/usecases/UpdateNotificationReadUseCase';
 
 // 알림 읽음 상태 변경 (PATCH)
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -21,14 +21,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     const notificationRepository = new SbNotiRepository();
-    const markAsReadUseCase = new MarkAsReadUseCase(notificationRepository);
+    const updateNotificationReadUseCase = new UpdateNotificationReadUseCase(notificationRepository);
+    const result = await updateNotificationReadUseCase.execute(notificationId, user.id);
 
-    const updatedNotification = await markAsReadUseCase.execute(notificationId);
-
-    return NextResponse.json({
-      success: true,
-      notification: updatedNotification,
-    });
+    return NextResponse.json(result);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : '알림 상태 변경 중 오류가 발생했습니다.';

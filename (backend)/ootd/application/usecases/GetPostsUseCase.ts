@@ -10,9 +10,14 @@ class GetPostUseCase {
   }
 
   // Get current season posts with optional sorting
-  async getAllPosts(myUserId: number, sort?: string): Promise<BoardWithUser[]> {
+  async getCurrentSeasonPosts(
+    myUserId: number,
+    sort?: string,
+    offset?: number,
+    limit?: number,
+  ): Promise<BoardWithUser[]> {
     try {
-      const boards = await this.boardRepository.getCurrentSeasonPosts(sort);
+      const boards = await this.boardRepository.getCurrentSeasonPosts(sort, offset, limit);
       return boards.map((board) => BoardMapper.toDomain(board, myUserId));
     } catch (error) {
       console.error('Error fetching boards:', error);

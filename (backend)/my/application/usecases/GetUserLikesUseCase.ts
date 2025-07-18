@@ -1,13 +1,20 @@
-import { IUserRepository } from '../../domain/repositories/IUserRepository';
-import { UserLike } from '../../domain/entities/User';
+import {
+  IUserRepository,
+  PaginationParams,
+  PaginatedResponse,
+  PostWithPhotos,
+} from '../../domain/repositories/IUserRepository';
 
 export class GetUserLikesUseCase {
   constructor(private userRepository: IUserRepository) {}
 
-  async execute(userId: number): Promise<UserLike[]> {
+  async execute(
+    userId: number,
+    pagination?: PaginationParams,
+  ): Promise<PaginatedResponse<PostWithPhotos>> {
     try {
-      const likes = await this.userRepository.getUserLikes(userId);
-      return likes;
+      const result = await this.userRepository.getUserLikes(userId, pagination);
+      return result;
     } catch (error) {
       console.error('Error fetching user likes:', error);
       throw error;

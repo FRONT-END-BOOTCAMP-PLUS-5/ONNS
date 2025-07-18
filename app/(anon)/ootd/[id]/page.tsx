@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import PostUserInfo from '@/app/(anon)/ootd/[id]/components/PostUserInfo';
-// import Image from 'next/image';
+import Image from 'next/image';
 import Heart from '@/public/assets/icons/heart.svg';
 import StrokeHeart from '@/public/assets/icons/stroke_heart.svg';
 import StrokeComment from '@/public/assets/icons/stroke_comment.svg';
@@ -13,6 +13,7 @@ import api from '@/utils/axiosInstance';
 import type { CommentWithUser } from '@/(backend)/comments/application/dtos/CommentDto';
 import type { BoardWithUser } from '@/(backend)/ootd/application/dtos/BoardDto';
 import { formatDate } from '@/utils/date/formatDate';
+import { useCallback } from 'react';
 
 //ootd detail
 export default function OotdDetail() {
@@ -29,7 +30,7 @@ export default function OotdDetail() {
   const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
 
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     try {
       setIsLoadingPost(true);
       const res = await api.get(`/posts/${id}`);
@@ -41,9 +42,9 @@ export default function OotdDetail() {
     } finally {
       setIsLoadingPost(false);
     }
-  };
+  }, [id]);
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       setIsLoadingComments(true);
       const res = await api.get(`/posts/${id}/comments`);
@@ -52,9 +53,9 @@ export default function OotdDetail() {
     } finally {
       setIsLoadingComments(false);
     }
-  };
+  }, [id]);
 
-  const fetchLikeStatus = async () => {
+  const fetchLikeStatus = useCallback(async () => {
     try {
       const res = await api.get(`/posts/${id}/likes`);
       setIsLiked(res.data.isLiked);
@@ -62,7 +63,7 @@ export default function OotdDetail() {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [id]);
 
   const handlePostDelete = async () => {
     try {
@@ -126,15 +127,15 @@ export default function OotdDetail() {
 
   useEffect(() => {
     fetchPost();
-  }, [id]);
+  }, [id, fetchPost]);
 
   useEffect(() => {
     fetchComments();
-  }, [id]);
+  }, [id, fetchComments]);
 
   useEffect(() => {
     fetchLikeStatus();
-  }, [id]);
+  }, [id, fetchLikeStatus]);
 
   return (
     <>
@@ -152,14 +153,17 @@ export default function OotdDetail() {
               isMyPost={post.isMyPost}
               handlePostDelete={handlePostDelete}
             />
-            {/* <Image
-              src={post.photos && post.photos.length > 0 ? post.photos[0].img_url : ''}
-              alt="게시글 이미지"
-              className="w-full h-[429px] bg-neutral-200"
-              width={600}
-              height={429}
-            /> */}
-            <div className="w-full h-[429px] bg-neutral-200" />
+            <div className="relative w-full h-[429px] bg-neutral-200 object-cover">
+              <Image
+                src={post.photos && post.photos.length > 0 ? post.photos[0].img_url : ''}
+                alt="게시글 이미지"
+                className="object-cover"
+                fill
+                priority
+              />
+            </div>
+
+            {/* <div className="w-full h-[429px] bg-neutral-200" />  */}
             {/* 좋아요, 댓글 수 영역 */}
             <div className="flex flex-row ml-[20px] mr-[20px] pt-[12px] pb-[12px] ">
               <div onClick={handleLike} className="cursor-pointer">
@@ -169,12 +173,16 @@ export default function OotdDetail() {
                   <StrokeHeart className="w-[24px] h-[24px] mr-[3px]" />
                 )}
               </div>
-              <span className="text-[14px] align-middle font-normal mr-[10px]">{likeCount}</span>
+              <span className="text-[14px] align-middle font-normal mr-[10px] text-black">
+                {likeCount}
+              </span>
               <StrokeComment className="w-[24px] h-[24px] mb-[4px] mr-[3px]" />
-              <span className="text-[14px] align-middle font-normal">{commentCount}</span>
+              <span className="text-[14px] align-middle font-normal text-black">
+                {commentCount}
+              </span>
             </div>
             {/* 텍스트 영역 */}
-            <div className="ml-[20px] mr-[20px] text-[14px] font-normal leading-[21px] whitespace-pre-line">
+            <div className="ml-[20px] mr-[20px] text-[14px] font-normal leading-[21px] whitespace-pre-line text-black">
               {post.text}
             </div>
             <span className="text-xs text-gray-400 ml-[20px] mr-[20px]">

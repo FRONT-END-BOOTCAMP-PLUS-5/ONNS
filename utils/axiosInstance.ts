@@ -6,6 +6,15 @@ const api = axios.create({
 
 let isRefreshing = false;
 let refreshPromise: Promise<void> | null = null;
+let isRedirecting = false;
+
+const redirectToLogin = () => {
+  if (!isRedirecting) {
+    isRedirecting = true;
+    console.log('Redirecting to login...');
+    window.location.href = '/?login=1';
+  }
+};
 
 api.interceptors.response.use(
   (response) => response,
@@ -13,6 +22,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (originalRequest.url === '/auth/refresh') {
+      redirectToLogin();
       return Promise.reject(error);
     }
 
@@ -21,10 +31,12 @@ api.interceptors.response.use(
 
       if (isRefreshing && refreshPromise) {
         try {
+          console.log('Waiting for existing refresh...');
           await refreshPromise;
+          console.log('Refresh completed, retrying request...');
           return api(originalRequest);
         } catch (refreshError) {
-          window.location.href = '/?login=1';
+          redirectToLogin();
           return Promise.reject(refreshError);
         }
       }
@@ -39,13 +51,19 @@ api.interceptors.response.use(
       refreshPromise = refreshAxios
         .post('/auth/refresh')
         .then(() => {
+          console.log('Token refresh successful');
           isRefreshing = false;
           refreshPromise = null;
         })
         .catch((refreshError) => {
+          console.log(
+            'Token refresh failed:',
+            refreshError.response?.status,
+            refreshError.response?.data,
+          );
           isRefreshing = false;
           refreshPromise = null;
-          window.location.href = '/?login=1';
+          redirectToLogin();
           return Promise.reject(refreshError);
         });
 
@@ -53,7 +71,7 @@ api.interceptors.response.use(
         await refreshPromise;
         return api(originalRequest);
       } catch (refreshError) {
-        window.location.href = '/?login=1';
+        redirectToLogin();
         return Promise.reject(refreshError);
       }
     }

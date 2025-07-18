@@ -18,7 +18,7 @@ const Input: React.FC<InputProps> = ({ value, onChange, onSend, inputRef }) => {
         <input
           type="text"
           ref={inputRef}
-          className="flex-1 h-full bg-[#f1f0f0] rounded-l-xl rounded-r-xl px-4 py-2 text-[15px] text-gray-700 placeholder-gray-400 border-none outline-none focus:ring-0"
+          className="flex-1 h-full bg-[#f1f0f0] rounded-l-xl rounded-r-xl px-4 py-2 text-[15px] text-black placeholder-gray-400 border-none outline-none focus:ring-0"
           placeholder={'댓글을 입력해주세요.'}
           value={value}
           onChange={onChange}

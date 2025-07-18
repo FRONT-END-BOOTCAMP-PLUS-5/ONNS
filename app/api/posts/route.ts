@@ -2,80 +2,64 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabase/supabaseClient';
 import { getUserFromJWT } from '@/utils/auth/tokenAuth';
 import SbBoardRepository from '@/(backend)/ootd/infrastructure/repositories/SbBoardRepositories';
-import GetRandomPostsUseCase from '@/(backend)/ootd/application/usecases/GetRandomPostsUseCase';
-import GetRandomPostsByTempUseCase from '@/(backend)/ootd/application/usecases/GetRandomPostsByTempUseCase';
 import GetMostLikedPostsUseCase from '@/(backend)/ootd/application/usecases/GetMostLikedPostsUseCase';
 import GetMostLikedByTempUseCase from '@/(backend)/ootd/application/usecases/GetMostLikedPostsByTempUseCase';
 import CreateUseCase from '@/(backend)/ootd/application/usecases/CreateUseCase';
 import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostsUseCase';
 
-/* 게시글 조회 (다양한 정렬 및 필터링) */
+// 게시글 조회
 export async function GET(req: NextRequest) {
   try {
-    // 토큰 인증
+    // 인증
     const user = await getUserFromJWT();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Query parameters
     const { searchParams } = new URL(req.url);
-    const sort = searchParams.get('sort') || 'recent'; // recent, random, likes, temp
+    const sort = searchParams.get('sort') || 'recent';
+    const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const offset = (page - 1) * limit;
     const order = searchParams.get('order') || 'desc';
-    const season = searchParams.get('season') || null; // spring, summer, autumn, winter
-    const currentTemp = parseInt(searchParams.get('temp') || '0'); // current temperature for temp-based filtering
+    const season = searchParams.get('season') || null;
+    const currentTemp = parseInt(searchParams.get('temp') || '0');
+    // min, max 파라미터 추가
+    const min = searchParams.get('min');
+    const max = searchParams.get('max');
 
-    // 의존성 주입
     const boardRepository = new SbBoardRepository(supabase);
-
     let posts;
     let message;
 
-    // Handle season filtering first (if specified)
+    // 계절별 필터 (+ 온도 필터)
     if (season) {
-      posts = await boardRepository.getBySeason(season, sort);
-      message = `${season} 계절 게시글을 성공적으로 조회했습니다.`;
-      posts = posts.slice(0, limit);
+      posts = await boardRepository.getBySeason(
+        season,
+        sort,
+        min ? Number(min) : undefined,
+        max ? Number(max) : undefined,
+        offset,
+        limit,
+      );
+      message = `${season} 계절 게시글 조회 성공`;
     } else {
-      // Handle sorting without season filter
+      // 기타 정렬/필터
       switch (sort) {
-        case 'random':
-          // Check if temperature is provided for temperature-based random posts
-          if (currentTemp && !isNaN(currentTemp)) {
-            const getRandomPostsByTempUseCase = new GetRandomPostsByTempUseCase(boardRepository);
-            posts = await getRandomPostsByTempUseCase.execute({
-              myUserId: user.id,
-              currentTemp,
-              tempRange: 5,
-              limit,
-            });
-            message = `현재 온도(${currentTemp}°C) 기준 ±5도 범위 내 랜덤 게시글을 성공적으로 조회했습니다.`;
-          } else {
-            const getRandomPostsUseCase = new GetRandomPostsUseCase(boardRepository);
-            posts = await getRandomPostsUseCase.execute(user.id, limit);
-            message = '랜덤 게시글을 성공적으로 조회했습니다.';
-          }
-          break;
-
         case 'likes':
           if (!currentTemp || isNaN(currentTemp)) {
             const getMostLikedPostsUseCase = new GetMostLikedPostsUseCase(boardRepository);
             posts = await getMostLikedPostsUseCase.execute(user.id, limit);
-            message = '인기 게시글을 성공적으로 조회했습니다.';
+            message = '인기 게시글 조회 성공';
           } else {
             const getMostLikedByTempUseCase = new GetMostLikedByTempUseCase(boardRepository);
             posts = await getMostLikedByTempUseCase.execute(user.id, currentTemp, limit);
-            message = `현재 온도(${currentTemp}°C) 기준 ±5도 범위 내 인기 게시글을 성공적으로 조회했습니다.`;
+            message = `현재 온도(${currentTemp}°C) ±5도 내 인기 게시글 조회 성공`;
           }
           break;
-
         case 'recent':
         default:
           const getRecentPostsUseCase = new GetPostUseCase(boardRepository);
-          posts = await getRecentPostsUseCase.getAllPosts(user.id, sort);
-          message = '최신 게시글을 성공적으로 조회했습니다.';
-          posts = posts.slice(0, limit);
+          posts = await getRecentPostsUseCase.getCurrentSeasonPosts(user.id, sort, offset, limit);
+          message = '최신 게시글 조회 성공';
           break;
       }
     }
@@ -89,34 +73,59 @@ export async function GET(req: NextRequest) {
         limit,
         order,
         season: season || 'current',
+        min: min || null,
+        max: max || null,
         temp: currentTemp || null,
         total: posts.length,
       },
     });
   } catch (error) {
     console.error('게시글 조회 실패:', error);
-    const message = error instanceof Error ? error.message : '게시글 조회 중 오류가 발생했습니다.';
+    const message = error instanceof Error ? error.message : '게시글 조회 중 오류';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-/* 게시글 작성 */
+// 게시글 작성
 export async function POST(req: NextRequest) {
   try {
     const user = await getUserFromJWT();
-    if (!user) {
-      return NextResponse.json({ message: '로그인이 필요합니다.' }, { status: 401 });
+    if (!user) return NextResponse.json({ message: '로그인이 필요합니다.' }, { status: 401 });
+
+    // 1. FormData 파싱
+    const formData = await req.formData();
+    const file = formData.get('image') as File | null;
+    const text = formData.get('text') as string | null;
+    const feels_likeStr = formData.get('feels_like') as string | null;
+    const feels_like = feels_likeStr ? Number(feels_likeStr) : null;
+
+    if (!file || !text || !feels_like) {
+      return NextResponse.json(
+        { message: '이미지, 내용, 체감온도 모두 필요합니다.' },
+        { status: 400 },
+      );
     }
 
+    // 2. Supabase Storage에 이미지 업로드
+    const fileName = `${user.id}_${Date.now()}_${file.name}`;
+    const { data, error } = await supabase.storage
+      .from('ootd-img') // 실제 버킷 이름으로 변경!
+      .upload(fileName, file, { contentType: file.type });
+
+    if (data) {
+      console.log(data);
+    }
+    if (error) {
+      return NextResponse.json({ message: '이미지 업로드 실패', error }, { status: 500 });
+    }
+
+    // 3. 이미지 URL 생성
+    const imageUrl = supabase.storage.from('ootd-img').getPublicUrl(fileName).data.publicUrl;
+
+    // 4. 게시글 저장
     const supabaseClient = supabase;
     const repository = new SbBoardRepository(supabaseClient);
     const createUseCase = new CreateUseCase(repository);
-
-    const body = await req.json();
-    const { text, feels_like, img_url } = body;
-
-    // img_url이 문자열이면 배열로 변환
-    const imgUrls = img_url ? (Array.isArray(img_url) ? img_url : [img_url]) : [];
 
     const created = await createUseCase.execute(
       {
@@ -124,12 +133,12 @@ export async function POST(req: NextRequest) {
         feels_like,
         user_id: user.id,
       },
-      imgUrls,
+      [imageUrl],
     );
 
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
-    console.error('Error creating board:', error);
+    console.error('게시글 생성 실패:', error);
     return NextResponse.json({ message: '서버 에러', error: 'UNKNOWN_ERROR' }, { status: 500 });
   }
 }

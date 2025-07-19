@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import Arrow from '@/public/assets/icons/arrow.svg';
-import { useSeasonStore } from '@/stores/seasonStore';
 
 interface DropdownProps<T> {
   selected: T;
@@ -9,6 +8,7 @@ interface DropdownProps<T> {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   ref: React.RefObject<HTMLDivElement | null>;
+  setSelectedSeason: (season: string) => void;
 }
 
 function SeasonFilter<T extends string | number>({
@@ -17,9 +17,8 @@ function SeasonFilter<T extends string | number>({
   isOpen,
   setIsOpen,
   ref,
+  setSelectedSeason,
 }: DropdownProps<T>) {
-  const { setSelectedSeason } = useSeasonStore();
-
   return (
     <div>
       <div ref={ref} className="relative inline-block pl-[20px] pt-[32px]">

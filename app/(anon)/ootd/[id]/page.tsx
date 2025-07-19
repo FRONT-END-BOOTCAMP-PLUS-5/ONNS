@@ -140,8 +140,8 @@ export default function OotdDetail() {
   return (
     <>
       {isLoadingPost ? (
-        <div className="w-full flex justify-center items-center h-[200px] text-gray-400 text-lg">
-          게시글 로딩 중...
+        <div className="w-full flex justify-center items-center h-[200px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--b400)]"></div>
         </div>
       ) : (
         post && (
@@ -194,8 +194,8 @@ export default function OotdDetail() {
       {/* 댓글 영역 */}
       <div className="ml-4 mr-4">
         {isLoadingComments ? (
-          <div className="w-full flex justify-center items-center h-[100px] text-gray-400 text-base">
-            댓글 로딩 중...
+          <div className="w-full flex justify-center items-center h-[100px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--b400)]"></div>
           </div>
         ) : (
           comments.map((comment) => (

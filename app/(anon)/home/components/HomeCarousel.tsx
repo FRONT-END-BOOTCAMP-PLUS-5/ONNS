@@ -19,8 +19,10 @@ const HomeCarousel = ({ slides }: HomeCarouselProps) => {
   const router = useRouter();
   if (slides.length === 0) {
     return (
-      <div className="w-full h-[384px] flex items-center justify-center">
-        <div className="text-gray-500">이미지가 로딩 중입니다.</div>
+      <div className="ml-4 mr-4">
+        <div className="relative w-full h-[384px] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--b400)]"></div>
+        </div>
       </div>
     );
   }

@@ -92,12 +92,12 @@ export default function HomeClient() {
 
   //게시글 fetch
   useEffect(() => {
-    fetchCarouselSlides();
-  }, [fetchCarouselSlides]);
-
-  useEffect(() => {
-    fetchTopPosts();
-  }, [fetchTopPosts]);
+    const loadData = async () => {
+      await fetchCarouselSlides();
+      await fetchTopPosts();
+    };
+    loadData();
+  }, [fetchCarouselSlides, fetchTopPosts]);
 
   //핸들러
   const handleCloseModalAndRemoveLoginParam = () => {

@@ -18,11 +18,12 @@ import { useAuthStore } from '@/stores/authStore';
 import { useWeatherStore } from '@/stores/weatherState';
 
 import { Post } from '@/types/posts';
+import Toast from '@/app/components/Toast';
 
 export default function HomeClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { lat, lon } = useLocation();
+  const { lat, lon, showToast, setShowToast } = useLocation();
   useWeather(lat, lon);
   const { cityName, feels_like, umbrellaIndex, dustIndex } = useWeatherStore();
   const [carouselSlides, setCarouselSlides] = useState<{ id: number; img: string }[]>([]);
@@ -126,7 +127,7 @@ export default function HomeClient() {
       />
       <WeatherIndex umbrellaIndex={umbrellaIndex} dustIndex={dustIndex} />
       <TodayWeatherInfo cityname={cityName} feels_like={feels_like} />
-      <div className="mt=[4px] text-neutral-800/40 text-xs font-light ml-4 mr-4 text-right">
+      <div className="mt-[4px] text-neutral-800/40 text-xs font-light ml-4 mr-4 text-right">
         **체감온도 기준
       </div>
       <div className="text-black text-[22px] font-semibold mb-[16px] mt-[6px] ml-4 mr-4">
@@ -139,6 +140,14 @@ export default function HomeClient() {
       <TopPosts posts={topPosts} />
       <div className="mt-[32px] pb-[50px] px-[20px]">
         <MoreButton content="더 보러 가기" onClick={() => router.push('/ootd')} />
+      </div>
+      <div>
+        <Toast
+          message={`위치 접근 권한을 허용해주세요.더 정확한 날씨 정보를 제공합니다.`}
+          isVisible={showToast}
+          onClose={() => setShowToast(false)}
+          duration={5000}
+        />
       </div>
     </>
   );

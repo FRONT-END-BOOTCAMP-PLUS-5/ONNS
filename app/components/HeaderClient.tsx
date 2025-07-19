@@ -12,7 +12,7 @@ const HeaderClient = () => {
 
   if (pathname === '/ootd/write') {
     headerProps = { isClose: true };
-  } else if (/^\/ootd\/\d+$/.test(pathname)) {
+  } else if (/^\/ootd\/\d+$/.test(pathname) || pathname === '/notification') {
     headerProps = { isGoBack: true };
   }
   return <Header {...headerProps} />;

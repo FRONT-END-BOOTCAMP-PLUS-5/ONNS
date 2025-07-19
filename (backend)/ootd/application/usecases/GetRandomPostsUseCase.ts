@@ -9,7 +9,7 @@ class GetRandomPostsUseCase {
     this.boardRepository = boardRepository;
   }
 
-  async execute(myUserId: number, limit: number = 5): Promise<BoardWithUser[]> {
+  async execute(myUserId?: number, limit: number = 5): Promise<BoardWithUser[]> {
     try {
       const boards = await this.boardRepository.getRandomPosts(limit);
       return boards.map((board) => BoardMapper.toDomain(board, myUserId));

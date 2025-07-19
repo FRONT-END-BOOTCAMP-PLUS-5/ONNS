@@ -11,8 +11,12 @@ import GetPostUseCase from '@/(backend)/ootd/application/usecases/GetPostsUseCas
 export async function GET(req: NextRequest) {
   try {
     // 인증
-    const user = await getUserFromJWT();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    let user = null;
+    try {
+      user = await getUserFromJWT();
+    } catch {
+      user = null;
+    }
 
     const { searchParams } = new URL(req.url);
     const sort = searchParams.get('sort') || 'recent';
@@ -47,18 +51,18 @@ export async function GET(req: NextRequest) {
         case 'likes':
           if (!currentTemp || isNaN(currentTemp)) {
             const getMostLikedPostsUseCase = new GetMostLikedPostsUseCase(boardRepository);
-            posts = await getMostLikedPostsUseCase.execute(user.id, limit);
+            posts = await getMostLikedPostsUseCase.execute(user?.id, limit);
             message = '인기 게시글 조회 성공';
           } else {
             const getMostLikedByTempUseCase = new GetMostLikedByTempUseCase(boardRepository);
-            posts = await getMostLikedByTempUseCase.execute(user.id, currentTemp, limit);
+            posts = await getMostLikedByTempUseCase.execute(user?.id, currentTemp, limit);
             message = `현재 온도(${currentTemp}°C) ±5도 내 인기 게시글 조회 성공`;
           }
           break;
         case 'recent':
         default:
           const getRecentPostsUseCase = new GetPostUseCase(boardRepository);
-          posts = await getRecentPostsUseCase.getCurrentSeasonPosts(user.id, sort, offset, limit);
+          posts = await getRecentPostsUseCase.getCurrentSeasonPosts(user?.id, sort, offset, limit);
           message = '최신 게시글 조회 성공';
           break;
       }

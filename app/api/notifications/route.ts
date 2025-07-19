@@ -13,13 +13,19 @@ export async function GET(req: NextRequest) {
 
     // Query parameters for filtering
     const { searchParams } = new URL(req.url);
+    const hasUnread = searchParams.get('hasUnread');
     const unread = searchParams.get('unread');
     const recent = searchParams.get('recent');
 
     const notificationRepository = new SbNotiRepository();
     const getAllNotificationsUseCase = new GetAllNotificationsUseCase(notificationRepository);
-
     const notifications = await getAllNotificationsUseCase.execute(user.id);
+
+    if (hasUnread === 'true') {
+      // 읽지 않은 알림이 하나라도 있으면 true 반환
+      const hasUnreadValue = notifications.some((notification) => !notification.isRead);
+      return NextResponse.json({ hasUnread: hasUnreadValue });
+    }
 
     // Filter by unread if specified
     let filteredNotifications = notifications;

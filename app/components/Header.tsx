@@ -17,18 +17,42 @@ const Header = ({
   isGoBack = false,
   isClose = false,
   isHome = false,
-  hasUnreadNotification = false,
+  hasUnreadNotification,
 }: HeaderProps) => {
   const router = useRouter();
+
+  const handleLeftClick = () => {
+    if (isGoBack) {
+      router.back();
+    }
+  };
+
+  const handleRightClick = () => {
+    if (isClose) {
+      router.back();
+    } else if (isHome) {
+      if (hasUnreadNotification === undefined) return;
+      router.push('/notification');
+    }
+  };
+
   return (
     <div className="w-full pt-[16px] py-[16px] pl-[20px] pr-[20px] bg-white inline-flex justify-between items-center">
-      <button className="w-[24px] h-[24px] flex items-center justify-center " onClick={router.back}>
+      <button
+        className="w-[24px] h-[24px] flex items-center justify-center "
+        onClick={handleLeftClick}
+      >
         {isGoBack && <Back />}
       </button>
       <Logo width={92} height={29} />
-      <button className="w-[24px] h-[24px] flex items-center justify-center " onClick={router.back}>
+      <button
+        className="w-[24px] h-[24px] flex items-center justify-center "
+        onClick={handleRightClick}
+      >
         {isClose && <Close />}
-        {isHome && (hasUnreadNotification ? <NotificationUnread /> : <Notification />)}
+        {isHome &&
+          hasUnreadNotification !== undefined &&
+          (hasUnreadNotification ? <NotificationUnread /> : <Notification />)}
       </button>
     </div>
   );

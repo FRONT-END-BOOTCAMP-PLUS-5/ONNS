@@ -1,7 +1,7 @@
 import { RawBoardWithUser, BoardWithUser } from '../../application/dtos/BoardDto';
 
 class BoardMapper {
-  static toDomain(raw: RawBoardWithUser, myUserId: number): BoardWithUser {
+  static toDomain(raw: RawBoardWithUser, myUserId?: number): BoardWithUser {
     return {
       id: raw.id,
       text: raw.text,
@@ -12,7 +12,7 @@ class BoardMapper {
       user: raw.user,
       comment_count: raw.comment_count || 0,
       like_count: raw.like_count || 0,
-      isMyPost: myUserId === raw.user_id,
+      isMyPost: myUserId !== undefined && myUserId === raw.user_id,
     };
   }
 }

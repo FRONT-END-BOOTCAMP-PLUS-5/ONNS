@@ -7,11 +7,11 @@ import Comment from '@/public/assets/icons/chat.svg';
 import Like from '@/public/assets/icons/heart.svg';
 import { useRouter } from 'next/navigation';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { useSeasonStore } from '@/stores/seasonStore';
 import { usePathname } from 'next/navigation';
-import { useTempFilterStore } from '@/stores/tempFilterStore';
-import { useSortStore } from '@/stores/sortStore';
 import Postfloating from './Postfloating';
+import TempFlt from './TempFlt/TempFlt';
+import SortPost from './SortPost/SortPost';
+import OotdSeasonDropdown from './SeasonFlt/OotdSeasonDropdown';
 
 function getCurrentSeason() {
   const month = new Date().getMonth() + 1;
@@ -25,32 +25,27 @@ const LIMIT = 6;
 
 const OotdPostList = () => {
   const router = useRouter();
-  const selectedSeason = useSeasonStore((state) => state.selectedSeason);
   const pathname = usePathname();
-  const setSelectedSeason = useSeasonStore((state) => state.setSelectedSeason);
+  const [selectedSeason, setSelectedSeason] = useState(getCurrentSeason());
+  const [selectedTemp, setSelectedTemp] = useState('전체');
+  const [sort, setSort] = useState('recent');
   const [posts, setPosts] = useState<BoardWithUser[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const selectedTemp = useTempFilterStore((state) => state.selectedTemp);
-  const sort = useSortStore((state) => state.sort);
 
-  // 온도 구간 파싱 함수 (모든 형식 지원)
   function parseTempRange(tempRange: string) {
     if (tempRange === '전체') return {};
 
-    // "0-4" 형식 처리
     if (tempRange.includes('-') && !tempRange.includes('~')) {
       const [min, max] = tempRange.split('-').map(Number);
       return { min, max };
     }
 
-    // "~(-6)" 형식 처리
     if (tempRange.startsWith('~(') && tempRange.endsWith(')')) {
       const max = Number(tempRange.replace('~(', '').replace(')', ''));
       return { max };
     }
 
-    // "-5~ -1" 형식 처리 (공백 제거)
     if (tempRange.includes('~')) {
       const [minStr, maxStr] = tempRange.split('~');
       const min = minStr.trim() !== '' ? Number(minStr.trim()) : undefined;
@@ -85,7 +80,7 @@ const OotdPostList = () => {
     if (pathname === '/ootd') {
       setSelectedSeason(getCurrentSeason());
     }
-  }, [pathname, setSelectedSeason]);
+  }, [pathname]);
 
   useEffect(() => {
     setPosts([]);
@@ -102,11 +97,26 @@ const OotdPostList = () => {
 
   return (
     <>
+      <div className="flex">
+        <OotdSeasonDropdown selectedSeason={selectedSeason} setSelectedSeason={setSelectedSeason} />
+        <TempFlt
+          selectedSeason={selectedSeason}
+          selectedTemp={selectedTemp}
+          setSelectedTemp={setSelectedTemp}
+        />
+      </div>
+      <div className="flex justify-end">
+        <SortPost sort={sort} setSort={setSort} />
+      </div>
       <InfiniteScroll
         dataLength={posts.length}
         next={handleLoadMore}
         hasMore={hasMore}
-        loader={<div>로딩중...</div>}
+        loader={
+          <div className="w-full flex justify-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--b400)]"></div>
+          </div>
+        }
         endMessage={
           <div className="w-full flex justify-center py-4">
             <span className="text-[#6A71E5] text-sm">모든 게시글을 불러왔습니다.</span>

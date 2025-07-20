@@ -40,6 +40,7 @@ export default function My() {
         onProfileUpdate={handleProfileUpdate}
       />
       <ToggleBar />
+      <span className="flex w-full h-[80px]"></span>
     </div>
   );
 }

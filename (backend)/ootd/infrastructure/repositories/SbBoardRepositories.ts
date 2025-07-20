@@ -110,7 +110,7 @@ class SbBoardRepository implements IBoardRepository {
   }
 
   // 게시글 ID로 상세 조회
-  async getById(id: string, myUserId: number): Promise<Board | null> {
+  async getById(id: string, myUserId?: number): Promise<Board | null> {
     try {
       const { data, error } = await this.buildPostQuery().eq('id', id).single();
 
@@ -249,12 +249,13 @@ class SbBoardRepository implements IBoardRepository {
         query = query.limit(limit);
       }
 
-      // 인기순 정렬: 최신순 정렬(order by date_created)을 적용하지 않음
       if (sort === 'popular') {
-        // limit, offset 없이 전체 데이터 조회
-        const { data, error } = await this.buildPostQuery()
+        let popQuery = this.buildPostQuery()
           .gte('date_created', startDate)
           .lt('date_created', endDate);
+        if (!isNaN(minNum)) popQuery = popQuery.gte('feels_like', minNum);
+        if (!isNaN(maxNum)) popQuery = popQuery.lte('feels_like', maxNum);
+        const { data, error } = await popQuery;
         if (error) throw error;
         const postsWithCounts = this.transformBoardDataArray(data || []);
         // 좋아요 내림차순, 같으면 최신순
@@ -263,7 +264,6 @@ class SbBoardRepository implements IBoardRepository {
           if (likeDiff !== 0) return likeDiff;
           return new Date(b.date_created).getTime() - new Date(a.date_created).getTime();
         });
-        // 페이지네이션 적용
         return sorted.slice(offset ?? 0, (offset ?? 0) + (limit ?? 10));
       }
 

@@ -3,7 +3,7 @@ import { BoardWithUser } from '../dtos/BoardDto';
 import BoardMapper from '../../infrastructure/mapper/BoardMapper';
 
 interface GetRandomPostsByTempUseCaseProps {
-  myUserId: number;
+  myUserId?: number;
   currentTemp: number;
   tempRange: number;
   limit: number;

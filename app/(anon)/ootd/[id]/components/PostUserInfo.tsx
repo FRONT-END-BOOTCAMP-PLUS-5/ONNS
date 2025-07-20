@@ -50,12 +50,15 @@ const PostUserInfo = ({
         </div>
         {isMyPost && (
           <div className="relative" ref={popoverRef}>
-            <button onClick={() => setOpen((v) => !v)}>
+            <button
+              className="w-[24px] h-[24px] flex items-center justify-center"
+              onClick={() => setOpen((v) => !v)}
+            >
               <More />
             </button>
             {open && (
               <button
-                className="w-[58px] h-[30px] absolute top-5 right-0 border-[#F0EEEE] bg-[#F0EEEE] rounded-[10px] text-[12px] font-light"
+                className="z-100 w-[58px] h-[30px] absolute top-8 right-0 border-[#F0EEEE] bg-[#F0EEEE] rounded-[10px] text-[12px] font-light"
                 onClick={() => {
                   setOpen(false);
                   setShowModal(true);

@@ -64,7 +64,7 @@ const OotdPostList = () => {
       const tempParams = parseTempRange(selectedTemp);
       if (tempParams.min !== undefined) params.min = tempParams.min;
       if (tempParams.max !== undefined) params.max = tempParams.max;
-      const res = await axiosInstance.get('http://localhost:3000/api/posts', { params });
+      const res = await axiosInstance.get('/posts', { params });
       const newPosts = res.data.data;
       if (pageNum === 1) {
         setPosts(newPosts);

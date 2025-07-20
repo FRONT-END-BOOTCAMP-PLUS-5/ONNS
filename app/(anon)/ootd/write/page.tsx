@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import ImgMore from '@/public/assets/icons/img_more.svg';
 import { Button } from '@/app/components/Button';
 import { useRouter } from 'next/navigation';
+import api from '@/utils/axiosInstance';
 
 //write
 export default function Write() {
@@ -33,23 +34,22 @@ export default function Write() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!image || content.trim().length === 0 || feels_like == null) return;
+
     const formData = new FormData();
     formData.append('image', image);
     formData.append('text', content);
     formData.append('feels_like', feels_like?.toString());
 
     try {
-      const res = await fetch(`/api/posts`, {
-        method: 'POST',
-        body: formData,
+      await api.post('/posts', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      if (!res.ok) {
-        console.log('업로드 실패');
-        return;
-      }
+
       router.push('/ootd');
     } catch (error) {
-      console.log(error);
+      console.log('Error:', error);
     }
   };
 
@@ -99,7 +99,7 @@ export default function Write() {
           {content.length} / 500자 이내
         </div>
       </section>
-      <div className="w-full fixed bottom-0 left-1/2 -translate-x-1/2  flex justify-center z-10 bg-white py-[20px]">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2  flex justify-center z-10 bg-white py-[20px]">
         <Button content="등록하기" disabled={isButtonDisabled} type="submit" />
       </div>
     </form>

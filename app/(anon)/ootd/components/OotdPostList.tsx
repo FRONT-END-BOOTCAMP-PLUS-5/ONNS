@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import axiosInstance from '@/utils/axiosInstance';
 import { BoardWithUser } from '@/(backend)/ootd/application/dtos/BoardDto';
 import Image from 'next/image';
 import Comment from '@/public/assets/icons/chat.svg';
@@ -12,6 +11,7 @@ import Postfloating from './Postfloating';
 import TempFlt from './TempFlt/TempFlt';
 import SortPost from './SortPost/SortPost';
 import OotdSeasonDropdown from './SeasonFlt/OotdSeasonDropdown';
+import api from '@/utils/axiosInstance';
 
 function getCurrentSeason() {
   const month = new Date().getMonth() + 1;
@@ -64,7 +64,7 @@ const OotdPostList = () => {
       const tempParams = parseTempRange(selectedTemp);
       if (tempParams.min !== undefined) params.min = tempParams.min;
       if (tempParams.max !== undefined) params.max = tempParams.max;
-      const res = await axiosInstance.get('/posts', { params });
+      const res = await api.get('/posts', { params });
       const newPosts = res.data.data;
       if (pageNum === 1) {
         setPosts(newPosts);

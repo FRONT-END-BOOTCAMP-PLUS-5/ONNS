@@ -75,9 +75,10 @@ export async function DELETE() {
 
     const result = await userDeleteUseCase.execute(token);
 
-    // 쿠키 삭제
+    // 쿠키 삭제 (access token과 refresh token 모두)
     const response = NextResponse.json(result);
     response.cookies.set('token', '', { maxAge: 0, path: '/' });
+    response.cookies.set('refresh_token', '', { maxAge: 0, path: '/' });
 
     return response;
   } catch (error) {

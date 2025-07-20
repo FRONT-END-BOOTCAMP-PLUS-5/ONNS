@@ -147,13 +147,14 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ type }) => {
 
       {/* End of content */}
       {!hasMore && photos.length > 0 && (
-        <div className="text-center py-4 text-gray-500">No more photos to load</div>
+        // <div className="text-center py-4 text-gray-500">No more photos to load</div>
+        <div></div>
       )}
 
       {/* Empty state */}
       {!loading && photos.length === 0 && (
         <div className="text-center py-8 text-gray-500">
-          {type === 'my' ? 'No photos yet' : 'No liked photos yet'}
+          {type === 'my' ? '아직 업로드한 ootd가 없어요.' : '아직 좋아요한 ootd가 없어요.'}
         </div>
       )}
     </div>

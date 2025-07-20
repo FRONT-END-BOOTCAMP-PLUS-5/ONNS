@@ -4,7 +4,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Autoplay, Navigation } from 'swiper/modules';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 interface Slide {
@@ -13,10 +12,10 @@ interface Slide {
 }
 interface HomeCarouselProps {
   slides: Slide[];
+  onSlideClick: (postId: number) => void;
 }
 
-const HomeCarousel = ({ slides }: HomeCarouselProps) => {
-  const router = useRouter();
+const HomeCarousel = ({ slides, onSlideClick }: HomeCarouselProps) => {
   if (slides.length === 0) {
     return (
       <div className="ml-4 mr-4">
@@ -59,8 +58,8 @@ const HomeCarousel = ({ slides }: HomeCarouselProps) => {
                 alt={`slide-${slide.id}`}
                 fill
                 className="object-cover cursor-pointer"
-                onClick={() => router.push(`/ootd/${slide.id}`)}
-                priority
+                onClick={() => onSlideClick(slide.id)}
+                priority={idx === 0}
               />
             </div>
           </SwiperSlide>

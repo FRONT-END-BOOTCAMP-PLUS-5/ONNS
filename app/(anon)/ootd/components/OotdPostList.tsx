@@ -106,7 +106,11 @@ const OotdPostList = () => {
         dataLength={posts.length}
         next={handleLoadMore}
         hasMore={hasMore}
-        loader={<div>로딩중...</div>}
+        loader={
+          <div className="w-full flex justify-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--b400)]"></div>
+          </div>
+        }
         endMessage={
           <div className="w-full flex justify-center py-4">
             <span className="text-[#6A71E5] text-sm">모든 게시글을 불러왔습니다.</span>

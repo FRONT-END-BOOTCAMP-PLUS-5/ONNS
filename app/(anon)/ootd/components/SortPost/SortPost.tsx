@@ -2,7 +2,6 @@
 import React from 'react';
 import Arrow from '@/public/assets/icons/arrow.svg';
 import useDropdown from '@/hooks/useDropdown';
-import { useSortStore } from '@/stores/sortStore';
 
 const SORT_OPTIONS = ['최신순', '인기순'];
 const SORT_MAP: Record<string, 'recent' | 'popular'> = {
@@ -10,9 +9,15 @@ const SORT_MAP: Record<string, 'recent' | 'popular'> = {
   인기순: 'popular',
 };
 
-const SortPost = () => {
-  const { isOpen, setIsOpen, selected, setSelected, ref } = useDropdown(SORT_OPTIONS[0]);
-  const setSort = useSortStore((state) => state.setSort);
+interface SortPostProps {
+  sort: string;
+  setSort: (sort: string) => void;
+}
+
+const SortPost = ({ sort, setSort }: SortPostProps) => {
+  const selectedOption =
+    Object.keys(SORT_MAP).find((key) => SORT_MAP[key] === sort) || SORT_OPTIONS[0];
+  const { isOpen, setIsOpen, selected, setSelected, ref } = useDropdown(selectedOption);
 
   return (
     <div ref={ref} className=" relative inline-block mr-[20px]">

@@ -2,15 +2,19 @@
 import React, { useEffect } from 'react';
 import Arrow from '@/public/assets/icons/arrow.svg';
 import useDropdown from '@/hooks/useDropdown';
-import { useSeasonStore } from '@/stores/seasonStore';
 import getTempOptionsBySeason from '@/utils/ootd/getTempOptionsBySeason';
-import { useTempFilterStore } from '@/stores/tempFilterStore';
 
-const TempFlt = () => {
-  const selectedSeason = useSeasonStore((state) => state.selectedSeason);
+interface TempFltProps {
+  selectedSeason: string;
+  selectedTemp: string;
+  setSelectedTemp: (temp: string) => void;
+}
+
+const TempFlt = ({ selectedSeason, selectedTemp, setSelectedTemp }: TempFltProps) => {
   const TEMP_RANGES = getTempOptionsBySeason(selectedSeason);
-  const { isOpen, setIsOpen, selected, setSelected, ref } = useDropdown(TEMP_RANGES[0]);
-  const setSelectedTemp = useTempFilterStore((state) => state.setSelectedTemp);
+  const { isOpen, setIsOpen, selected, setSelected, ref } = useDropdown(
+    selectedTemp || TEMP_RANGES[0],
+  );
 
   useEffect(() => {
     if (!TEMP_RANGES.includes(selected)) {

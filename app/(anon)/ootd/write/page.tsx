@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import ImgMore from '@/public/assets/icons/img_more.svg';
 import { Button } from '@/app/components/Button';
 import { useRouter } from 'next/navigation';
+import api from '@/utils/axiosInstance';
 
 //write
 export default function Write() {
@@ -33,23 +34,22 @@ export default function Write() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!image || content.trim().length === 0 || feels_like == null) return;
+
     const formData = new FormData();
     formData.append('image', image);
     formData.append('text', content);
     formData.append('feels_like', feels_like?.toString());
 
     try {
-      const res = await fetch(`/api/posts`, {
-        method: 'POST',
-        body: formData,
+      await api.post('/posts', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      if (!res.ok) {
-        console.log('업로드 실패');
-        return;
-      }
+
       router.push('/ootd');
     } catch (error) {
-      console.log(error);
+      console.log('Error:', error);
     }
   };
 

@@ -92,7 +92,7 @@ export default function Write() {
           className="w-full h-[120px] bg-[#F0EEEE] rounded-[6px] p-3 mt-[14px] text-black placeholder:text-[#858585] resize-none outline-none"
           placeholder="오늘 날씨에 맞는 코디를 설명해주세요."
           value={content}
-          onChange={handleContentChange}
+          onInput={handleContentChange}
           maxLength={500}
         />
         <div className="text-right text-[#858585] text-sm mt-[2px]">

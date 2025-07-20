@@ -113,6 +113,14 @@ export default function HomeClient() {
     window.location.href = kakaoAuthUrl;
   };
 
+  const handlePostClick = (postId: number) => {
+    if (isJwtAuthenticated) {
+      router.push(`/ootd/${postId}`);
+    } else {
+      handleOpenModal();
+    }
+  };
+
   return (
     <>
       {showLoginModal && (
@@ -133,11 +141,11 @@ export default function HomeClient() {
       <div className="text-black text-[22px] font-semibold mb-[16px] mt-[6px] ml-4 mr-4">
         OOTD, 이건 어때요?
       </div>
-      <HomeCarousel slides={carouselSlides} />
+      <HomeCarousel slides={carouselSlides} onSlideClick={handlePostClick} />
       <div className="text-black text-[22px] font-semibold mb-[16px] mt-[6px] ml-4 mr-4 whitespace-pre-line leading-[28px] mt-[24px]">
         {`${feels_like}℃, 오늘 뭐 입지? \n 인기 코디 모아보기`}
       </div>
-      <TopPosts posts={topPosts} />
+      <TopPosts posts={topPosts} onPostClick={handlePostClick} />
       <div className="mt-[32px] pb-[50px] px-[20px]">
         <MoreButton content="더 보러 가기" onClick={() => router.push('/ootd')} />
       </div>

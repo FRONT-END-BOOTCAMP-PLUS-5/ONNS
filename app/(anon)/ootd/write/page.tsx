@@ -99,7 +99,7 @@ export default function Write() {
           {content.length} / 500자 이내
         </div>
       </section>
-      <div className="w-full fixed bottom-0 left-1/2 -translate-x-1/2  flex justify-center z-10 bg-white py-[20px]">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2  flex justify-center z-10 bg-white py-[20px]">
         <Button content="등록하기" disabled={isButtonDisabled} type="submit" />
       </div>
     </form>

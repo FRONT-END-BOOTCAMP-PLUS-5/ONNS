@@ -37,14 +37,14 @@ const SortPost = ({ sort, setSort }: SortPostProps) => {
             <button
               key={option}
               type="button"
-              className="w-[59px] h-[26px] flex items-center text-neutral-400 text-xs font-medium hover:bg-zinc-100 gap-[8px]"
+              className="w-[59px] h-[26px] flex justify-center items-center text-neutral-400 text-xs font-medium hover:bg-zinc-100"
               onClick={() => {
                 setSelected(option);
                 setSort(SORT_MAP[option]);
                 setIsOpen(false);
               }}
             >
-              <span className="w-[48px] h-[14px] text-neutral-400 text-xs font-medium">
+              <span className="w-[48px] h-[14px] text-start text-neutral-400 text-xs font-medium">
                 {option}
               </span>
             </button>

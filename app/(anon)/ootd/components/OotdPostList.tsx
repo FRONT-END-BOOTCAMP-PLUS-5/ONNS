@@ -123,7 +123,7 @@ const OotdPostList = () => {
           </div>
         }
       >
-        <div className="flex justify-center w-full px-4">
+        <div className="flex justify-center w-full px-4 pt-[8px]">
           <div className="w-full max-w-[390px] grid grid-cols-2 gap-y-[16px] gap-x-[8px] pb-[30px]">
             {posts.map((post) => (
               <div

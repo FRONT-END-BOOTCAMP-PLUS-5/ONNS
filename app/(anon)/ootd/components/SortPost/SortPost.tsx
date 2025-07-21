@@ -24,7 +24,7 @@ const SortPost = ({ sort, setSort }: SortPostProps) => {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="w-[59px] h-[27px] bg-white rounded-tl-[3px] rounded-tr-[3px] border border-zinc-300 flex items-center justify-between px-2"
+        className="w-[59px] h-[27px] bg-white rounded-tl-[4px] rounded-tr-[4px] border border-zinc-300 flex items-center justify-center gap-[8px]"
       >
         <span className="w-[32px] h-[14px] text-neutral-400 text-xs font-medium">{selected}</span>
         <span className={`transition-transform duration-200 ${isOpen ? 'rotate-0' : 'rotate-180'}`}>
@@ -37,14 +37,14 @@ const SortPost = ({ sort, setSort }: SortPostProps) => {
             <button
               key={option}
               type="button"
-              className="w-[59px] h-[26px] flex items-center px-2 text-neutral-400 text-xs font-medium hover:bg-zinc-100"
+              className="w-[59px] h-[26px] flex items-center text-neutral-400 text-xs font-medium hover:bg-zinc-100 gap-[8px]"
               onClick={() => {
                 setSelected(option);
                 setSort(SORT_MAP[option]);
                 setIsOpen(false);
               }}
             >
-              <span className="w-[32px] h-[14px] text-neutral-400 text-xs font-medium">
+              <span className="w-[48px] h-[14px] text-neutral-400 text-xs font-medium">
                 {option}
               </span>
             </button>

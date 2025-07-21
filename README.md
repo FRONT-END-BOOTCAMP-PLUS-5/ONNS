@@ -41,10 +41,10 @@
 ## 팀원 소개
 | 이름        | GitHub         | 역할                    |
 | -----------|----------------|----------------------- |
-| 송가은    | gn-ioeo   | 프론트엔드 / 기획 / PM            |
-| 송진호    | jaino-song    | 백엔드 / Supabase / API 설계  |
-| 신주현    | Shin363   | 프론트엔드 / UI 개발              |
-| 형대희    | HyungDaehee   | 백엔드 / 날씨 API 연동        |
+| 송가은    | gn-ioeo   | 로그인 기능 / 알림 기능 / 좋아요 기능 /  |
+| 송진호    | jaino-song    | 마이페이지 / 게시글 조건 조회 / API 설계  |
+| 신주현    | Shin363   | Home / 댓글 기능 / OpenWeather API, GeoLocation API 도입   |
+| 형대희    | HyungDaehee   | OOTD / 게시글 조건 구현    |
 
 ---
 
@@ -131,12 +131,12 @@ yarn build && yarn start  # 또는 npm run build && npm start
 ```
 
 ## 환경 변수
-|변수 이름        |	설명       |
-|---------------------------|
-|---------------------------|
-|NEXT_PUBLIC_SUPABASE_URL    |   Supabase 프로젝트 URL |
-|NEXT_PUBLIC_SUPABASE_ANON_KEY  |	Supabase 익명 키   |
-|WEATHER_API_KEY             |	외부 날씨 API (OpenWeather 등) 키 |
+| 변수 이름                     | 설명                                   |
+| ----------------------------- | -------------------------------------- |
+| NEXT_PUBLIC_SUPABASE_URL      | Supabase 프로젝트 URL                  |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY | Supabase 익명 키                       |
+| WEATHER_API_KEY               | 외부 날씨 API (OpenWeather 등) 키      |
+
 
 ## API 문서
 - Postman: ./OOTD-Permissions-Test.postman_collection.json

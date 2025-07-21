@@ -33,7 +33,6 @@ const Nav: React.FC<NavProps> = ({ className = '' }) => {
     if (isJwtAuthenticated) {
       router.push(route);
     } else {
-      // 로그인 모달 띄우는 로직 - URL 파라미터로 처리
       const url = new URL(window.location.href);
       url.searchParams.set('login', '1');
       window.location.href = url.toString();

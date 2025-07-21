@@ -34,11 +34,9 @@ const Header = ({
       router.back();
     } else if (isHome) {
       if (hasUnreadNotification === undefined) return;
-      // 로그인된 사용자만 알림 페이지 접근 가능
       if (isJwtAuthenticated) {
         router.push('/notification');
       } else {
-        // 비로그인 사용자는 로그인 모달 띄우기
         const url = new URL(window.location.href);
         url.searchParams.set('login', '1');
         window.location.href = url.toString();

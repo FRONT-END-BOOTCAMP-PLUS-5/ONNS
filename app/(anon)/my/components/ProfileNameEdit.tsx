@@ -1,4 +1,4 @@
-import EditPencil from '@/public/assets/icons/edit_pencil.svg';
+import EditPencil from '@/public/assets/icons/pen.svg';
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/utils/axiosInstance';
 
@@ -90,7 +90,7 @@ const ProfileNameEdit = ({ userName }: { userName: string | null }) => {
             }}
           />
           <span
-            className="text-black text-base font-medium font-['Pretendard'] cursor-pointer ml-2"
+            className="text-[#B2B2B2] text-sm font-medium font-['Pretendard'] cursor-pointer ml-2"
             onClick={handleSave}
           >
             확인

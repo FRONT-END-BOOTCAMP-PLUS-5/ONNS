@@ -5,6 +5,7 @@ import Logo from '@/public/assets/icons/logo.svg';
 import Notification from '@/public/assets/icons/notification-read.svg';
 import NotificationUnread from '@/public/assets/icons/notification_unread.svg';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/stores/authStore';
 
 interface HeaderProps {
   isGoBack?: boolean;
@@ -20,6 +21,7 @@ const Header = ({
   hasUnreadNotification,
 }: HeaderProps) => {
   const router = useRouter();
+  const { isJwtAuthenticated } = useAuthStore();
 
   const handleLeftClick = () => {
     if (isGoBack) {
@@ -32,7 +34,13 @@ const Header = ({
       router.back();
     } else if (isHome) {
       if (hasUnreadNotification === undefined) return;
-      router.push('/notification');
+      if (isJwtAuthenticated) {
+        router.push('/notification');
+      } else {
+        const url = new URL(window.location.href);
+        url.searchParams.set('login', '1');
+        window.location.href = url.toString();
+      }
     }
   };
 

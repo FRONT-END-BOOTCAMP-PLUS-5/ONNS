@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useAuthStore } from '@/stores/authStore';
 
 import OOTD from '@/public/assets/icons/ootd.svg';
 import HOME from '@/public/assets/icons/home.svg';
@@ -20,6 +21,7 @@ function shouldHideNav(pathname?: string) {
 const Nav: React.FC<NavProps> = ({ className = '' }) => {
   const pathname = usePathname();
   const router = useRouter();
+  const { isJwtAuthenticated } = useAuthStore();
 
   if (shouldHideNav(pathname)) return null;
 
@@ -27,13 +29,23 @@ const Nav: React.FC<NavProps> = ({ className = '' }) => {
   const isMyActive = pathname === '/my';
   const isHomeActive = pathname === '/' || (!isOOTDActive && !isMyActive);
 
+  const handleProtectedRoute = (route: string) => {
+    if (isJwtAuthenticated) {
+      router.push(route);
+    } else {
+      const url = new URL(window.location.href);
+      url.searchParams.set('login', '1');
+      window.location.href = url.toString();
+    }
+  };
+
   return (
     <div
       className={`fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col h-[100px] bg-white shadow-[0px_-8px_16px_0px_rgba(34,34,34,0.10)] z-50 max-w-[430px] w-full mx-auto ${className}`}
     >
       <div className="flex justify-around items-center h-full mt-[24px] mb-[21.26px]">
         <button
-          onClick={() => router.push('/ootd')}
+          onClick={() => handleProtectedRoute('/ootd')}
           className="flex flex-col justify-center items-center text-sm w-[53px] h-[48px]"
         >
           <OOTD width={28} height={24} fill={isOOTDActive ? '#6A71E5' : 'white'} />
@@ -49,7 +61,7 @@ const Nav: React.FC<NavProps> = ({ className = '' }) => {
         </button>
 
         <button
-          onClick={() => router.push('/my')}
+          onClick={() => handleProtectedRoute('/my')}
           className="flex flex-col justify-center items-center text-sm w-[53px] h-[48px]"
         >
           <MY width={20} height={24} fill={isMyActive ? '#6A71E5' : 'white'} />

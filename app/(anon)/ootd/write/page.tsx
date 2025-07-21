@@ -15,6 +15,8 @@ export default function Write() {
   const [preview, setPreview] = useState<string | null>(null);
   const [content, setContent] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const isButtonDisabled = !image || content.trim().length === 0;
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,8 +55,15 @@ export default function Write() {
     }
   };
 
+  const handleButtonClick = () => {
+    textareaRef.current?.blur();
+    setTimeout(() => {
+      formRef.current?.requestSubmit();
+    }, 0);
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} ref={formRef}>
       <div className="mt-[24px] mb-[20px]">
         <TodayWeatherInfo cityname={cityName} feels_like={feels_like} />
       </div>
@@ -89,18 +98,24 @@ export default function Write() {
       <section className="mx-[20px] mb-[30px]">
         <span className="text-black text-[20px] font-medium">내용</span>
         <textarea
+          ref={textareaRef}
           className="w-full h-[120px] bg-[#F0EEEE] rounded-[6px] p-3 mt-[14px] text-black placeholder:text-[#858585] resize-none outline-none"
           placeholder="오늘 날씨에 맞는 코디를 설명해주세요."
           value={content}
-          onChange={handleContentChange}
+          onInput={handleContentChange}
           maxLength={500}
         />
         <div className="text-right text-[#858585] text-sm mt-[2px]">
           {content.length} / 500자 이내
         </div>
       </section>
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2  flex justify-center z-10 bg-white py-[20px]">
-        <Button content="등록하기" disabled={isButtonDisabled} type="submit" />
+      <div className="w-full max-w-[430px] mx-auto fixed bottom-0 left-1/2 -translate-x-1/2  flex justify-center z-10 bg-white py-[20px]">
+        <Button
+          content="등록하기"
+          disabled={isButtonDisabled}
+          type="button"
+          onClick={handleButtonClick}
+        />
       </div>
     </form>
   );

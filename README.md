@@ -53,7 +53,7 @@
 | 영역          | 사용 기술                                                        |
 | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | Frontend    | Next.js 15 (App Router), React, TypeScript, Tailwind CSS, Axios, Zustand                                                                       |
-| Backend     | Supabase (PostgreSQL, Storage), 외부 날씨 API, GeoLocation API  |
+| Backend     | Supabase (PostgreSQL, Storage), OpenWeather API, GeoLocation API  |
 | Styling     | Tailwind CSS                                                  |
 | Dev Tools   | ESLint, Prettier, Husky, Commitlint, Git Flow                 |
 | 배포         | Vercel                                                        |

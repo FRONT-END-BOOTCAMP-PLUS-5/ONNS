@@ -28,10 +28,10 @@ const TempFlt = ({ selectedSeason, selectedTemp, setSelectedTemp }: TempFltProps
       <div ref={ref} className="relative inline-block pt-[32px] pl-[8px]">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-[65x] h-[26px] px-2.5 py-1.5 bg-white rounded-2xl outline outline-[1.20px] outline-offset-[-1.20px] outline-[#6A71E5] flex flex-col justify-start items-center gap-2 overflow-hidden text-xs"
+          className="w-[81px] h-[26px] px-2.5 py-1.5 bg-white rounded-2xl outline outline-[1.20px] outline-offset-[-1.20px] outline-[#6A71E5] flex flex-col justify-start items-center gap-2 overflow-hidden text-xs"
         >
           <div className="h-[14px] inline-flex justify-center items-center gap-1">
-            <span className="inline-flex items-center text-[#6A71E5] text-xs font-semibold">
+            <span className="w-[44px] inline-flex items-center text-[#6A71E5] text-xs font-semibold">
               {selected}
             </span>
             <Arrow

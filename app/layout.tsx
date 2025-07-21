@@ -47,7 +47,7 @@ export default function RootLayout({
         {/* 페이지 프레임 */}
         <div className="flex flex-col min-h-screen max-w-[430px] w-full mx-auto relative bg-white shadow-md z-10">
           <HeaderClient />
-          <main className="flex-1 pb-24 w-full">{children}</main>
+          <main className="flex-1 pb-24 w-full pt-[61px]">{children}</main>
           <Nav />
         </div>
       </body>

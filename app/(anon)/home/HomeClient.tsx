@@ -25,7 +25,7 @@ export default function HomeClient() {
   const router = useRouter();
   const { lat, lon, showToast, setShowToast } = useLocation();
   useWeather(lat, lon);
-  const { cityName, feels_like, umbrellaIndex, dustIndex } = useWeatherStore();
+  const { cityName, feels_like, dustIndex } = useWeatherStore();
   const [carouselSlides, setCarouselSlides] = useState<{ id: number; img: string }[]>([]);
   const [topPosts, setTopPosts] = useState<{ id: number; img: string }[]>([]);
   const { showLoginModal, handleOpenModal, isAuthenticated, loading, handleCloseModal } =
@@ -141,7 +141,7 @@ export default function HomeClient() {
         isHome={true}
         hasUnreadNotification={isJwtAuthenticated ? hasUnreadNotification : undefined}
       />
-      <WeatherIndex umbrellaIndex={umbrellaIndex} dustIndex={dustIndex} />
+      <WeatherIndex umbrellaIndex={true} dustIndex={dustIndex} />
       <TodayWeatherInfo cityname={cityName} feels_like={feels_like} />
       <div className="mt-[4px] text-neutral-800/40 text-xs font-light ml-4 mr-4 text-right">
         **체감온도 기준

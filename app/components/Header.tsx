@@ -45,7 +45,7 @@ const Header = ({
   };
 
   return (
-    <div className="w-full pt-[16px] py-[16px] pl-[20px] pr-[20px] bg-white inline-flex justify-between items-center">
+    <div className="w-full pt-[16px] py-[16px] pl-[20px] pr-[20px] bg-white inline-flex justify-between items-center fixed top-0 z-50 max-w-[430px] left-1/2 -translate-x-1/2">
       <button
         className="w-[24px] h-[24px] flex items-center justify-center "
         onClick={handleLeftClick}

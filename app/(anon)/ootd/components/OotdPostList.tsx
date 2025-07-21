@@ -123,7 +123,7 @@ const OotdPostList = () => {
           </div>
         }
       >
-        <div className="flex justify-center w-full px-4">
+        <div className="flex justify-center w-full px-4 pt-[8px]">
           <div className="w-full max-w-[390px] grid grid-cols-2 gap-y-[16px] gap-x-[8px] pb-[30px]">
             {posts.map((post) => (
               <div
@@ -170,7 +170,11 @@ const OotdPostList = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-1 min-w-0">
-                            <Like className="w-[16px] h-[16px] flex-shrink-0" />
+                            <Like
+                              fill="#ffffff"
+                              stroke="#6A71E5"
+                              className="w-[16px] h-[16px] flex-shrink-0"
+                            />
                             <div className="text-black text-sm font-medium leading-none">
                               {post.like_count ?? 0}
                             </div>

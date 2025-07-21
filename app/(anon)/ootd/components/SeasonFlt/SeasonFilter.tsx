@@ -21,15 +21,15 @@ function SeasonFilter<T extends string | number>({
 }: DropdownProps<T>) {
   return (
     <div>
-      <div ref={ref} className="relative inline-block pl-[20px] pt-[32px]">
+      <div ref={ref} className="inline-block pl-[20px] pt-[32px]">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-[59px] h-[26px] px-2.5 py-1.5 bg-white rounded-2xl outline outline-[1.20px] outline-offset-[-1.20px] outline-[#6A71E5] flex flex-col justify- items-center gap-2 overflow-hidden text-xs"
+          className="w-[59px] h-[26px] bg-white rounded-2xl outline-[1.20px] outline-offset-[-1.20px] outline-[#6A71E5] flex flex-col justify-center items-center overflow-hidden text-xs"
         >
-          <span className="inline-flex items-center text-[#6A71E5] text-xs font-semibold">
+          <span className="flex items-center gap-2 text-[#6A71E5] text-xs font-semibold">
             {selected}
             <Arrow
-              className={`w-[8px] h-[8px] ml-1 text-[#6A71E5] transition-transform duration-200 ${isOpen ? '' : 'rotate-180'}`}
+              className={`w-[8px] h-[8px] text-[#6A71E5] transition-transform duration-200 ${isOpen ? '' : 'rotate-180'}`}
             />
           </span>
         </button>

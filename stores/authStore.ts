@@ -1,6 +1,4 @@
 import { create } from 'zustand';
-import api from '@/utils/axiosInstance';
-import { AxiosError } from 'axios';
 
 interface AuthState {
   isJwtAuthenticated: boolean;
@@ -14,8 +12,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   hasUnreadNotification: undefined,
   checkJwt: async () => {
     try {
-      const res = await api.get('/users/me', { withCredentials: true });
-      if (res.status === 200) {
+      const res = await fetch('/api/users/me', { credentials: 'include' });
+      if (res.ok) {
         set((state) => {
           if (!state.isJwtAuthenticated) {
             return { isJwtAuthenticated: true };
@@ -23,40 +21,20 @@ export const useAuthStore = create<AuthState>((set) => ({
           return state;
         });
       } else if (res.status === 401) {
-        // 401이면 refresh 시도
-        try {
-          const refreshRes = await api.post('/auth/refresh', {}, { withCredentials: true });
-          if (refreshRes.status === 200) {
-            // 재발급 성공 시 다시 확인
-            const retryRes = await api.get('/users/me', { withCredentials: true });
-            if (retryRes.status === 200) {
-              set({ isJwtAuthenticated: true });
-              return;
-            }
+        set((state) => {
+          if (state.isJwtAuthenticated) {
+            return { isJwtAuthenticated: false };
           }
-        } catch {
-          // refresh 실패
-        }
-        set({ isJwtAuthenticated: false });
+          return state;
+        });
       }
-    } catch (err: unknown) {
-      if (err instanceof AxiosError && err.response && err.response.status === 401) {
-        // 401이면 refresh 시도
-        try {
-          const refreshRes = await api.post('/auth/refresh', {}, { withCredentials: true });
-          if (refreshRes.status === 200) {
-            // 재발급 성공 시 다시 확인
-            const retryRes = await api.get('/users/me', { withCredentials: true });
-            if (retryRes.status === 200) {
-              set({ isJwtAuthenticated: true });
-              return;
-            }
-          }
-        } catch {
-          // refresh 실패
+    } catch {
+      set((state) => {
+        if (state.isJwtAuthenticated) {
+          return { isJwtAuthenticated: false };
         }
-      }
-      set({ isJwtAuthenticated: false });
+        return state;
+      });
     }
   },
   setHasUnreadNotification: (value) => set({ hasUnreadNotification: value }),

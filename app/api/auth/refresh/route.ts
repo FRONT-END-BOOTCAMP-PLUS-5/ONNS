@@ -39,7 +39,7 @@ export async function POST() {
       httpOnly: true,
       path: '/',
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 15,
+      maxAge: 60 * 60,
     });
 
     return NextResponse.json({ success: true, access_token: tokens.accessToken });

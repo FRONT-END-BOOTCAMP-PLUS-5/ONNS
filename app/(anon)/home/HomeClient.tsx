@@ -121,6 +121,14 @@ export default function HomeClient() {
     }
   };
 
+  const handleProtectedRoute = (route: string) => {
+    if (isJwtAuthenticated) {
+      router.push(route);
+    } else {
+      handleOpenModal();
+    }
+  };
+
   return (
     <>
       {showLoginModal && (
@@ -147,7 +155,7 @@ export default function HomeClient() {
       </div>
       <TopPosts posts={topPosts} onPostClick={handlePostClick} />
       <div className="mt-[32px] pb-[50px] px-[20px]">
-        <MoreButton content="더 보러 가기" onClick={() => router.push('/ootd')} />
+        <MoreButton content="더 보러 가기" onClick={() => handleProtectedRoute('/ootd')} />
       </div>
       <div>
         <Toast

@@ -10,14 +10,14 @@
 - [프로젝트 목표](#프로젝트-목표)  
   - [사용자 관점](#사용자-관점)  
   - [개발자 관점](#개발자-관점)  
+- [팀원 소개](#팀원-소개)
 - [기술 스택](#기술-스택)  
 - [핵심 기능 요약](#핵심-기능-요약)  
 - [디렉토리 구조](#디렉토리-구조)  
 - [설치 및 실행](#설치-및-실행)  
 - [환경 변수](#환경-변수)  
 - [API 문서](#api-문서)  
-- [팀원 소개](#팀원-소개)  
-- [기여하기](#기여하기)  
+
 
 ---
 
@@ -37,6 +37,15 @@
 - Figma 디자인 시안과 **동일한 UI** 구현 및 **REST API 명세** 문서화  
 
 ---
+
+## 팀원 소개
+| 이름	| GitHub | 역할 |
+|---------------------|
+|---------------------|
+| 송가은	| gn-ioeo	| 프론트엔드 / 기획 / PM |
+| 송진호	| jaino-song	| 백엔드 / Supabase / API 설계 |
+| 신주현	| Shin363	| 프론트엔드 / UI 개발 |
+| 형대희	| HyungDaehee	| 백엔드 / 날씨 API 연동 |
 
 ## 기술 스택
 
@@ -87,3 +96,53 @@ ONNS/
 ├── vercel.json                 # Vercel 배포 설정
 ├── package.json                # 종속성 및 스크립트 정의
 └── tsconfig.json               # TypeScript 설정
+
+
+## 설치 및 실행
+
+### 저장소 클론
+```
+git clone https://github.com/FRONT-END-BOOTCAMP-PLUS-5/ONNS.git
+cd ONNS
+```
+
+### 의존성 설치
+```
+yarn install  # 또는 npm install
+```
+
+### 환경 변수 설정
+> 루트에 .env.local 파일을 생성하고, 아래 값을 입력하세요.
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+WEATHER_API_KEY=your_openweather_api_key
+```
+
+### 개발 서버 실행
+```
+yarn dev  # 또는 npm run dev
+```
+
+###빌드 및 프로덕션 서버
+```
+yarn build && yarn start  # 또는 npm run build && npm start
+```
+
+## 환경 변수
+|변수 이름        |	설명       |
+|---------------------------|
+|---------------------------|
+|NEXT_PUBLIC_SUPABASE_URL    |   Supabase 프로젝트 URL |
+|NEXT_PUBLIC_SUPABASE_ANON_KEY  |	Supabase 익명 키   |
+|WEATHER_API_KEY             |	외부 날씨 API (OpenWeather 등) 키 |
+
+## API 문서
+- Postman: ./OOTD-Permissions-Test.postman_collection.json
+- 주요 엔드포인트:
+    - GET /api/posts
+    - POST /api/posts
+    - PATCH /api/posts/:id
+    - DELETE /api/posts/:id
+    - POST /api/posts/:id/like
+    - POST /api/posts/:id/comments
